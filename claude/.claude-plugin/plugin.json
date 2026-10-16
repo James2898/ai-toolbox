@@ -1,0 +1,12 @@
+{
+  "name": "ai-toolbox",
+  "version": "0.1.0",
+  "description": "Skills, agents, rules and hooks for day-to-day dev work: QA test documents, spec and PBI review, PR and git helpers, bug-fix workflow, live browser verification, explainers and task orchestration. Project details come from a profile, so the tools work on any repository.",
+  "author": {
+    "name": "James2898",
+    "url": "https://github.com/James2898"
+  },
+  "repository": "https://github.com/James2898/ai-toolbox",
+  "license": "MIT",
+  "keywords": ["qa", "testing", "pr-review", "git", "spec", "pbi", "live-verification", "antigravity"]
+}

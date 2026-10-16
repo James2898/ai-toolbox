@@ -1,0 +1,25 @@
+{
+  "description": "Guards for the multi-agent workflow: keep agents out of forbidden files, warn about unstaged task artifacts before commits, and check chain hygiene after agent runs.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Bash",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/agent-read-guard.sh" },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-commit-staging-check.sh" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pm-parallel-check.sh" },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/worktree-cleanup.sh" },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/task-logger-pending-check.sh" },
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/chain-end-commit-check.sh" }
+        ]
+      }
+    ]
+  }
+}

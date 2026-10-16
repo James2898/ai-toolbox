@@ -1,0 +1,6 @@
+{
+  "name": "ai-toolbox",
+  "displayName": "AI Toolbox",
+  "description": "Skills, agents, rules and hooks for day-to-day dev work: QA test documents, spec and PBI review, PR and git helpers, bug-fix workflow, live browser verification, explainers and task orchestration. Project details come from a profile, so the tools work on any repository.",
+  "version": "0.1.0"
+}
