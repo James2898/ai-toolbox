@@ -1,0 +1,104 @@
+# ai-toolbox project profile
+#
+# Skills read project-specific settings from here instead of hard-coding them.
+# Lookup order:
+#   1. the file named by the AI_TOOLBOX_PROFILE environment variable
+#   2. <project root>/.ai-toolbox/profile.yml
+#   3. no profile: the skill detects what it can (git remote, package.json, go.mod, ...)
+#      and asks for the rest
+#
+# A profile often names internal systems (hosts, schemas, reviewers). Keep real profiles
+# out of public repositories: point AI_TOOLBOX_PROFILE at a private file instead.
+# Every key is optional; leave a value empty to let the skill detect or ask.
+
+project:
+  name: my-app
+  frontend_dir: web                # JS package root inside the repo ("." if it is the root)
+
+git:
+  default_base: main               # used when a change does not belong to a longer-lived train
+  topic_bases:                     # long-lived branches that feature work stacks on
+    - pattern: "feature/*/beta"
+  protected: [main, develop, "release/*"]   # never created, pushed to directly, or deleted
+  branch_format: "<type>/<topic>/<slug>"    # or "<type>/<slug>"
+  merge_method: merge              # merge | squash | rebase
+  post_merge_command: ""           # run locally after a merge, e.g. "git submodule update --init --recursive"
+
+review:
+  final_reviewer: ""               # GitHub login whose approval is the merge gate; empty = ask
+  assignee_merges: true            # the PR assignee merges after the final approval
+  comment_labels: ["[MUST]", "[IMO]", "[nits]", "[ASK]"]   # prefixes reviewers use; first = blocking
+  inline_comments_only: false      # draft review comments inline only, with no summary review
+  pr_title_format: ""              # e.g. "fix({topic}): <summary>"
+
+commands:                          # exact invocations; leave empty to auto-detect
+  frontend_check: "npm run type-check && npm run lint && npm test"
+  backend_test: "go test ./..."
+  format_check: ""                 # a formatter check not covered by frontend_check, e.g. "npx prettier --check ."
+  build_logs: ""                   # where compile errors show up, e.g. "docker compose logs api"
+  dependent_suites:                # when a package changes, also run the suites of these packages
+    "internal/service/": ["internal/handler/"]
+
+environments:
+  local_url: "http://localhost:3000"   # where the branch under test runs
+  baseline_url: ""                     # a deployed environment for "before" evidence
+  forbidden_hosts: []                  # never send requests here (production and shared hosts)
+  browser_mcp: ""                      # the only browser-automation MCP tool prefix allowed, e.g. "mcp__playwright__browser_"
+
+docs:
+  pbi_dir: pbi-docs                # where PBI / ticket hardcopies are saved
+  specs_dir: docs/specs
+  api_spec: docs/api/openapi.yaml
+  qa_out_dir: .qa                  # where test plans, matrices and data are written (gitignore it)
+  memory_dir: ""                   # where the assistant keeps lessons, if your tool has a memory folder
+
+api:
+  client_layer: ""                 # where the frontend's request functions live
+  handler_layer: ""                # where backend request/response structs live
+
+database:
+  ddl_paths: [db/migrations]       # files that define tables, newest last
+  seed_paths: []                   # seed / master-data files whose rows already exist locally
+  tenant_routing: ""               # how to find the right schema in a multi-tenant setup
+  local_container: ""              # e.g. a docker container name for local queries
+
+bug_tracker:
+  source: csv                      # csv export of the tracker
+  export_glob: ""                  # where to look for the newest export, e.g. "~/Downloads/bugs*.csv"
+  columns:                         # map your sheet's headers to the fields skills use
+    id: ""
+    title: ""
+    status: ""
+    phase: ""
+    assignee: ""
+    severity: ""
+    research: ""                   # findings / cause
+    how_to_fix: ""                 # fix description
+    remark: ""
+    date_pushed: ""
+  status_values:                   # list every spelling or language that should match
+    new: ["New"]
+    in_progress: ["In progress"]
+    skip: ["Closed", "On hold"]
+  phase_values:
+    current: ""                    # default phase to triage
+  status_while_open: ""            # status to suggest while the fix PR is open
+  status_after_merge: ""           # status to set when a fix is merged
+
+personas:                          # role names, so skills can resolve ambiguous terms like "admin"
+  - name: org-admin
+    scope: whole organization
+  - name: feature-admin
+    scope: one feature area
+
+qa_import:
+  importer: ""                     # a command that imports test cases, if your team has one
+  format: markdown-json            # markdown-json | csv
+
+deploy:                            # where each branch or tag ends up
+  - branch: develop
+    env: dev
+  - branch: main
+    env: staging
+  - tag: "v*"
+    env: production

@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.pyc
+*.swp
+*~
+# real project profiles stay private; only the example is published
+profiles/*.yml
+!profiles/example.yml
+.ai-toolbox/
+# skill-creator eval scaffolding and eval prompts (they reference real projects)
+*-workspace/
+claude/skills/*/evals/

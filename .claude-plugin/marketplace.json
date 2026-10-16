@@ -1,0 +1,14 @@
+{
+  "name": "ai-toolbox",
+  "description": "Skills, agents, rules and hooks for day-to-day development work, generalized for any project.",
+  "owner": {
+    "name": "James2898",
+    "url": "https://github.com/James2898"
+  },
+  "plugins": [
+    {
+      "name": "ai-toolbox",
+      "source": "./claude"
+    }
+  ]
+}
