@@ -1,0 +1,72 @@
+{
+  "_comment": "Orchestration section of the catalog site. Summarises claude/skills/project-manager/SKILL.md (sections 0-2) and claude/rules/agent-routing.md; update this file when either changes. build_site.py fails if an agent named here is not in claude/agents/.",
+  "source": "claude/skills/project-manager/SKILL.md",
+  "rules": "claude/rules/agent-routing.md",
+  "entry": "/ai-toolbox:project-manager",
+  "intro": "The project-manager skill is a router: it never writes code itself. It checks whether the work already exists, sorts the request into a tier by size and risk, then hands it to specialist agents in a fixed order. Agents with no shared input run in parallel, sent together in one message.",
+  "preflight": [
+    { "kind": "pm", "title": "Already-done check", "note": "Searches git history and the codebase for the feature. If it already exists and is merged, the PM reports that and stops: no agents run. Skipped for bug fixes and refactors." },
+    { "kind": "pm", "title": "Classify the tier", "note": "Small, medium or large by the triggers below. Unsure between 1 and 2: unverified backend or 5+ interaction states means Tier 2." }
+  ],
+  "tiers": [
+    {
+      "id": 0,
+      "name": "Fast path",
+      "size": "Small",
+      "triggers": "UI/UX tweaks, text changes, simple CSS fixes, label renames",
+      "skipped": ["requirements-engineer", "integration-contract", "task-logger", "release-manager"],
+      "stages": [
+        [ { "agent": "codebase-explorer", "role": "Context Finder", "note": "Finds the files and patterns to reuse. Returns them inline; no task file is created." } ],
+        [ { "agent": "fullstack-developer", "role": "Executor", "note": "Makes the change, then self-checks: exactly what was asked, no stray files, no new data access." } ],
+        [ { "agent": "validator-agent", "role": "Security / Refactor", "conditional": true, "note": "Only if the change touches auth, permissions, data access, migrations, secrets or privileged server code." } ]
+      ]
+    },
+    {
+      "id": 1,
+      "name": "Standard path",
+      "size": "Medium",
+      "triggers": "CRUD operations, form logic, category management, well-understood APIs",
+      "skipped": ["integration-contract"],
+      "stages": [
+        [
+          { "agent": "codebase-explorer", "role": "Context Finder", "note": "Reusable code and conventions." },
+          { "agent": "requirements-engineer", "role": "Gatekeeper", "note": "Ambiguities, edge cases, testable acceptance criteria. Pauses for the user on a blocking question." }
+        ],
+        [ { "agent": "task-logger", "role": "Scribe", "note": "Merges both outputs into one self-contained task file." } ],
+        [ { "agent": "fullstack-developer", "role": "Executor", "note": "Implements exactly what the task file says." } ],
+        [
+          { "agent": "release-manager", "role": "QA / Auditor", "note": "Checks every acceptance criterion; updates the changelog on PASS." },
+          { "agent": "validator-agent", "role": "Security / Refactor", "note": "Security, performance and architecture audit: APPROVED or BLOCKED." }
+        ],
+        [ { "agent": "debug-memory", "role": "Learner", "conditional": true, "note": "Records new root causes and anti-patterns. On a fully clean run the PM writes \"no new entries\" instead of spawning it." } ]
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Extended path",
+      "size": "Large",
+      "triggers": "Unknown or unverified backend APIs, complex interaction states, data aggregations, auth, exports",
+      "skipped": [],
+      "stages": [
+        [
+          { "agent": "codebase-explorer", "role": "Context Finder", "note": "Reusable code and conventions." },
+          { "agent": "requirements-engineer", "role": "Gatekeeper", "note": "Ambiguities, edge cases, testable acceptance criteria. Pauses for the user on a blocking question." }
+        ],
+        [ { "kind": "pm", "title": "Discover APIs", "note": "The PM reads the project's API inventory. Endpoints are never assumed to exist." } ],
+        [ { "agent": "integration-contract", "role": "Bridge", "note": "Maps every UI action to an endpoint and marks it EXISTS or MISSING, with a gap plan. If half or more are MISSING, the chain stops and asks the user." } ],
+        [ { "agent": "task-logger", "role": "Scribe", "note": "Consolidates specs, decisions and the technical schema into one task file." } ],
+        [ { "agent": "fullstack-developer", "role": "Executor", "note": "Frontend work plus any approved backend gap work." } ],
+        [
+          { "agent": "release-manager", "role": "QA / Auditor", "note": "Checks every acceptance criterion; updates the changelog on PASS." },
+          { "agent": "validator-agent", "role": "Security / Refactor", "note": "Security, performance and architecture audit: APPROVED or BLOCKED." }
+        ],
+        [ { "agent": "debug-memory", "role": "Learner", "conditional": true, "note": "Also records MISSING-endpoint fallbacks that shipped. Skipped on a fully clean run." } ]
+      ]
+    }
+  ],
+  "fix_loop": {
+    "applies_to": [1, 2],
+    "after_agent": "fullstack-developer",
+    "note": "If either reviewer finds a problem, both blocker lists go back to fullstack-developer in one pass, then both reviewers run again. The same blocker surviving 2 fixes stops the chain and goes to the user. A PASS WITH AMENDMENT (contradicting acceptance criteria, code is fine) is fixed in the task file by the PM, not sent back to the developer."
+  }
+}
