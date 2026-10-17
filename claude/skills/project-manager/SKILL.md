@@ -1,6 +1,7 @@
 ---
 name: project-manager
 description: Route development tasks to specialist sub-agents by complexity tier (0/1/2). Use when the user asks to implement a feature, fix a bug, refactor, or run a structured task chain. Invokes codebase-explorer, requirements-engineer, task-logger, fullstack-developer, release-manager, validator-agent, debug-memory via the Agent tool.
+disable-model-invocation: true
 ---
 
 # Project Manager Skill

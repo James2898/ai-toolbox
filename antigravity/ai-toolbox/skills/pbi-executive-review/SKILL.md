@@ -1,9 +1,10 @@
 ---
 name: pbi-executive-review
-description: "Reads a PBI document (pasted text, Markdown, PDF, or directory) and produces a structured review with executive summary, frontend/backend development phases, and a list of blocking concerns/questions. Codebase-aware — verifies referenced files, hooks, and components actually exist before recommending reuse."
+description: "User-only: run only when the user types /pbi-executive-review. Reads a PBI document (pasted text, Markdown, PDF, or directory) and produces a structured review with executive summary, frontend/backend development phases, and a list of blocking concerns/questions. Codebase-aware — verifies referenced files, hooks, and components actually exist before recommending reuse."
 ---
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
+> - User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.
 > - `ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion).
 > - `ARGS` means whatever the user typed after `/<this-skill>`, or the request that triggered it.
 

@@ -9,6 +9,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # Demo Guide

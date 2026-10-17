@@ -10,6 +10,7 @@ allowed-tools:
   - Grep
   - AskUserQuestion
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # Token Optimize

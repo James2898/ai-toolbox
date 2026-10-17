@@ -1,6 +1,6 @@
 ---
 name: pr-details
-description: "Generates a PR title and body with a reviewer test checklist from git diff, task file, and commit history"
+description: "Generates a PR title and body from the git diff, task file and commit history: summary (with a before/after diagram when a flow changes), reviewer test checklist, before/after Evidence pulled from diagnose loop files, live-verify reports and test runs, and a Merge danger block (one-way or two-way door, blast radius, rollback)."
 ---
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
@@ -75,6 +75,7 @@ Format: `feat(TASK-NNN): <verb> <object>` — ≤70 characters, imperative mood.
 
 - Source: `git diff --stat` grouped by directory + commit messages.
 - Do not restate the title. Focus on components and behaviors changed.
+- **Summary visual** (only when the change alters a flow, a state machine or which layer calls which): add a small before → after diagram under the bullets, as a Mermaid `flowchart` or a two-line ASCII sketch. Skip it for one-file fixes and copy changes; a diagram that restates the bullets is noise.
 
 ### 4c. Motivation
 
@@ -123,19 +124,43 @@ Single unified section covering functional verification **and** pre-merge checks
 - [ ] Dark mode tested
 - [ ] Vercel preview link attached
 
-### 4f. Screenshots
+### 4f. Evidence
 
-Static placeholder section — always include:
+Show that the change does what the PR says, as before → after pairs a reviewer can re-run. Collect from, in this order:
+
+1. **diagnose loop files** in `{loop_dir}` (profile `docs.loop_dir`, default `.ai-toolbox/loops`) whose cause `file:line` is in this diff: the loop command, its red output before, green after, and the regression test name.
+2. **live-verify reports** from this session or named by the user: per case, the toast text, status codes and UI state.
+3. **Test runs**: the new or changed tests, and the commands run with their pass counts.
 
 ```
-## Screenshots
+## Evidence
 
-_Attach screenshots or Vercel preview link here._
+| What | Before | After | Re-run with |
+|---|---|---|---|
+| <behaviour> | <red output / status / screenshot> | <green output / status / screenshot> | `<command>` |
 ```
+
+When nothing was collected, write `_No evidence collected yet — attach screenshots or test output._` rather than inventing rows. Use ids and statuses only; never personal data from the app or database.
+
+### 4g. Merge danger
+
+One short block so the reviewer knows how careful to be:
+
+```
+## Merge danger
+
+- Door: one-way | two-way — <why: a migration, a data rewrite, a public API or event contract, a deleted endpoint = one-way; UI and internal code behind no contract = two-way>
+- Blast radius: <screens, endpoints, jobs or other teams that read what changed — from importers of changed files and consumers of changed API shapes>
+- Rollback: <revert the PR | revert plus a data fix | needs a forward fix>
+```
+
+Derive it from the diff: migrations and schema files, changed request/response shapes, deleted or renamed exports, and shared components or hooks with many importers (`grep -rl` the changed export).
 
 ---
 
 ## STEP 5: Output to terminal
+
+If the repo has a PR template (`.github/pull_request_template.md` or `.github/PULL_REQUEST_TEMPLATE/`), keep its headings and put these sections inside it; Evidence and Merge danger go under the template's closest heading, or after its last one.
 
 Print the complete PR title and body using this exact wrapper format so the user can copy it cleanly:
 
@@ -177,3 +202,4 @@ Use `ask_question`:
 | `gh` not installed | Skip STEP 6; print manual `gh pr create` command |
 | Diff > 400 lines | Use `--stat` only for Changes section; note truncation in output |
 | No role-gating found | Omit Role-Based Access sub-group from Test Plan |
+| No loop file, live-verify report or test run | Evidence section states that none was collected |

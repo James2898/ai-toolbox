@@ -1,9 +1,10 @@
 ---
 name: project-manager
-description: "Route development tasks to specialist sub-agents by complexity tier (0/1/2). Use when the user asks to implement a feature, fix a bug, refactor, or run a structured task chain. Invokes codebase-explorer, requirements-engineer, task-logger, fullstack-developer, release-manager, validator-agent, debug-memory via the Agent tool."
+description: "User-only: run only when the user types /project-manager. Route development tasks to specialist sub-agents by complexity tier (0/1/2). Use when the user asks to implement a feature, fix a bug, refactor, or run a structured task chain. Invokes codebase-explorer, requirements-engineer, task-logger, fullstack-developer, release-manager, validator-agent, debug-memory via the Agent tool."
 ---
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
+> - User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.
 > - Where this says `Agent(subagent_type: "x")`, delegate to the subagent `x` in this plugin's `agents/` folder with the same prompt.
 
 # Project Manager Skill
