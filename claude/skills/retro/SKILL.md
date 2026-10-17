@@ -67,6 +67,8 @@ Done when: each cause has one proposed fix with its target file.
 
 ### 3. Rank and present
 
+Before the table, re-check each finding's evidence with a command: a claim that something is missing needs a search of the whole repo or plugin, not one folder. Correct or drop any finding that fails the check.
+
 ```markdown
 ## Retro — <session topic> (<YYYY-MM-DD>)
 
