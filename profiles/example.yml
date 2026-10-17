@@ -52,6 +52,7 @@ docs:
   qa_out_dir: .qa                  # where test plans, matrices and data are written (gitignore it)
   memory_dir: ""                   # where the assistant keeps lessons, if your tool has a memory folder
   loop_dir: .ai-toolbox/loops      # where /diagnose saves reproduction loops (pr-details reads them as evidence)
+  handoff_dir: .ai-toolbox/handoffs   # where /handoff writes and --resume reads handoff files
 
 api:
   client_layer: ""                 # where the frontend's request functions live
