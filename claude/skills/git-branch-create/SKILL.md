@@ -5,6 +5,7 @@ allowed-tools:
   - Bash
   - AskUserQuestion
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # Create a Work Branch
@@ -81,7 +82,7 @@ Ask once with `AskUserQuestion`, showing the name, the base, the base's latest c
 ## Step 6 — Create
 
 ```bash
-git switch -c "$NAME" "origin/$BASE"
+git switch -c "$NAME" --no-track "origin/$BASE"   # without --no-track, a bare push goes to the base
 git branch -vv
 ```
 

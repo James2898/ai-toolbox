@@ -1,9 +1,10 @@
 ---
 name: token-optimize
-description: "Audit and compress prompt-like files — SKILL.md skills, agent definitions, CLAUDE.md and rules files, slash commands, system prompts — to cut tokens without changing behavior. Measures each file (chars, lines, estimated tokens, how much of it is always-loaded description), names the padding it found (filler, repeated rules, prose that should be a table, shouting caps), proposes a compressed rewrite as a diff, and proves every flag, path, command, gate and output contract survived. Dry-run by default; writes only after the user approves the diff. Use whenever the user wants a skill, prompt or agent \"shorter\", \"leaner\", \"cheaper\", asks how many tokens a skill costs, says context is getting bloated, or wants to review the size of a skills folder or .claude/."
+description: "User-only: run only when the user types /token-optimize. Audit and compress prompt-like files — SKILL.md skills, agent definitions, CLAUDE.md and rules files, slash commands, system prompts — to cut tokens without changing behavior. Measures each file (chars, lines, estimated tokens, how much of it is always-loaded description), names the padding it found (filler, repeated rules, prose that should be a table, shouting caps), proposes a compressed rewrite as a diff, and proves every flag, path, command, gate and output contract survived. Dry-run by default; writes only after the user approves the diff. Use whenever the user wants a skill, prompt or agent \"shorter\", \"leaner\", \"cheaper\", asks how many tokens a skill costs, says context is getting bloated, or wants to review the size of a skills folder or .claude/."
 ---
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
+> - User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.
 > - `ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion).
 > - `ARGS` means whatever the user typed after `/<this-skill>`, or the request that triggered it.
 
@@ -28,7 +29,7 @@ Never write anything without `--apply` **and** an explicit yes on the shown diff
 
 ## Step 1 — Measure
 
-Run the bundled script (read-only). It prints one row per file: chars, lines, estimated tokens (chars ÷ 4, a ±20 % heuristic), the description's own token share, and heuristic flags.
+Run the bundled script (read-only). It prints one row per file: chars, lines, estimated tokens (chars ÷ 4, a ±20 % heuristic), the description's own token share, and heuristic flags. The summary separates descriptions loaded every session from those of user-only skills (`disable-model-invocation: true`), which load only when invoked.
 
 ```bash
 python3 -I <this skill's folder>/scripts/token_report.py <target> [--only '<glob>'] [--json]

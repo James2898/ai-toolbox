@@ -1,9 +1,10 @@
 ---
 name: git-branch-create
-description: "Create and switch to a new work branch the safe way — from a freshly fetched remote base, never from a stale local default, following the repo's naming convention (<type>/<topic>/<slug>, e.g. bugfix/billing/fix-invoice-rounding) and choosing the base deliberately (the default branch, or a long-lived train branch when the work belongs to it). Refuses protected names as the new branch, requires a clean tree, confirms base and name once, never pushes. Use whenever the user says \"create a branch\", \"new branch for…\", \"start work on bug 48\", \"branch off beta\", or is about to edit code while sitting on develop or master."
+description: "User-only: run only when the user types /git-branch-create. Create and switch to a new work branch the safe way — from a freshly fetched remote base, never from a stale local default, following the repo's naming convention (<type>/<topic>/<slug>, e.g. bugfix/billing/fix-invoice-rounding) and choosing the base deliberately (the default branch, or a long-lived train branch when the work belongs to it). Refuses protected names as the new branch, requires a clean tree, confirms base and name once, never pushes. Use whenever the user says \"create a branch\", \"new branch for…\", \"start work on bug 48\", \"branch off beta\", or is about to edit code while sitting on develop or master."
 ---
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
+> - User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.
 > - `ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion).
 > - `ARGS` means whatever the user typed after `/<this-skill>`, or the request that triggered it.
 
@@ -81,7 +82,7 @@ Ask once with `ask_question`, showing the name, the base, the base's latest comm
 ## Step 6 — Create
 
 ```bash
-git switch -c "$NAME" "origin/$BASE"
+git switch -c "$NAME" --no-track "origin/$BASE"   # without --no-track, a bare push goes to the base
 git branch -vv
 ```
 

@@ -5,6 +5,7 @@ allowed-tools:
   - Bash
   - AskUserQuestion
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # Approve a Pull Request

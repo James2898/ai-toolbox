@@ -70,10 +70,20 @@ def convert(body):
     return body
 
 
+def user_only(original):
+    m = re.match(r"^---\n(.*?)\n---", original, re.S)
+    return bool(m and re.search(r"^disable-model-invocation:\s*true\s*$", m.group(1), re.M))
+
+
 def render(fields, body, original, kind):
-    desc = fields["description"].replace("\\", "\\\\").replace('"', '\\"')
-    out = f"---\nname: {fields['name']}\ndescription: \"{desc}\"\n---\n"
+    desc = fields["description"]
     notes = [n for pat, n in NOTES if re.search(pat, original)]
+    if user_only(original):
+        # Antigravity has no disable-model-invocation; keep the intent in the text it reads.
+        desc = f"User-only: run only when the user types /{fields['name']}. {desc}"
+        notes.insert(0, "User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.")
+    desc = desc.replace("\\", "\\\\").replace('"', '\\"')
+    out = f"---\nname: {fields['name']}\ndescription: \"{desc}\"\n---\n"
     if notes:
         out += (f"\n> **Running in Antigravity**: this {kind} is generated from the Claude Code source.\n"
                 + "".join(f"> - {n}\n" for n in notes) + "\n")

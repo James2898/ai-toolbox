@@ -83,6 +83,8 @@ def measure(path: Path) -> dict:
         "lines": len(lines),
         "est_tokens": est_tokens(text),
         "description_tokens": est_tokens(desc),
+        # disable-model-invocation keeps the description out of the always-loaded skill list
+        "user_only": bool(re.search(r"^disable-model-invocation:\s*true\s*$", fm, re.M)),
         "filler_hits": filler,
         "shout_caps": shouts,
         "duplicate_lines": dupes,
@@ -189,8 +191,10 @@ def main(argv):
     for r in rows:
         print(f"{r['est_tokens']:>8} {r['description_tokens']:>8} {r['lines']:>6} {r['filler_hits']:>5} {r['shout_caps']:>5} {r['duplicate_lines']:>4}  {r['file']}")
     total = sum(r["est_tokens"] for r in rows)
-    desc_total = sum(r["description_tokens"] for r in rows)
-    print(f"\n{len(rows)} files, ~{total} tokens total; ~{desc_total} tokens of descriptions are loaded every session.")
+    desc_total = sum(r["description_tokens"] for r in rows if not r["user_only"])
+    hidden = sum(r["description_tokens"] for r in rows if r["user_only"])
+    print(f"\n{len(rows)} files, ~{total} tokens total; ~{desc_total} tokens of descriptions are loaded every session"
+          f" (~{hidden} more in user-only skills, loaded only when invoked).")
     return 0
 
 

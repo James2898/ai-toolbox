@@ -1,9 +1,10 @@
 ---
 name: gh-pr-approve
-description: "Approve a pull request with the gh CLI after checking that the active GitHub account is the one expected for the repository and is not the PR author (self-approval is refused), showing existing reviews, and confirming the exact PR and optional approval comment with the user. Approve-only — never comments, requests changes, or merges. Use whenever the user says \"approve this PR\", \"LGTM, approve PR 1090\", \"approve a teammate's PR\", or wants to submit an approving review from the terminal."
+description: "User-only: run only when the user types /gh-pr-approve. Approve a pull request with the gh CLI after checking that the active GitHub account is the one expected for the repository and is not the PR author (self-approval is refused), showing existing reviews, and confirming the exact PR and optional approval comment with the user. Approve-only — never comments, requests changes, or merges. Use whenever the user says \"approve this PR\", \"LGTM, approve PR 1090\", \"approve a teammate's PR\", or wants to submit an approving review from the terminal."
 ---
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
+> - User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.
 > - `ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion).
 > - `ARGS` means whatever the user typed after `/<this-skill>`, or the request that triggered it.
 

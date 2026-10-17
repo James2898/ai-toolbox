@@ -1,9 +1,10 @@
 ---
 name: demo-guide
-description: "Write a demo guide for presenting a change — audience and goal, environment choice (local branch vs a deployed environment, with the reason), personas by role, setup steps and data (via /test-data or the UI), a timed script table (say / do / show / if it fails), wow moments, known gaps said before someone asks, cleanup, and likely questions with prepared answers drawn from the PBI's open questions and review threads. Writes {qa_out_dir}/<slug>/demo-guide.md. Use whenever the user has to demo, present or walk stakeholders through a feature, prepare for sprint review, \"show this to the PO\", or wants a script and Q&A for a feature presentation."
+description: "User-only: run only when the user types /demo-guide. Write a demo guide for presenting a change — audience and goal, environment choice (local branch vs a deployed environment, with the reason), personas by role, setup steps and data (via /test-data or the UI), a timed script table (say / do / show / if it fails), wow moments, known gaps said before someone asks, cleanup, and likely questions with prepared answers drawn from the PBI's open questions and review threads. Writes {qa_out_dir}/<slug>/demo-guide.md. Use whenever the user has to demo, present or walk stakeholders through a feature, prepare for sprint review, \"show this to the PO\", or wants a script and Q&A for a feature presentation."
 ---
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
+> - User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.
 > - `ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion).
 > - `ARGS` means whatever the user typed after `/<this-skill>`, or the request that triggered it.
 

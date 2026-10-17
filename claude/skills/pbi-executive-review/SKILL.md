@@ -10,6 +10,7 @@ allowed-tools:
   - Agent
   - AskUserQuestion
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # PBI Executive Review Skill

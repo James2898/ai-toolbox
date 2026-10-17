@@ -1,6 +1,6 @@
 ---
 name: bugfix
-description: Orchestrate a bug fix end-to-end — triage, branch, root-cause, fix, validate, live-verify, record the lesson, PR, and the bug-tracker writeback. GUIDED, not autonomous — it runs each phase but stops at the genuine decision points (which fix approach, a design tradeoff, whether to push) so you stay in control; its job is to make sure no step gets skipped, not to decide for you. Composes the existing skills (bug-triage, live-verify, pr-details, pr-comment-triage) rather than reimplementing them, and owns the git/branch discipline, the investigation, and the tracker fields. Branch, base, test commands and tracker fields come from the project profile. Use when the user says "take bug NN", "fix this bug", "start on this bug", "work the bug sheet", or is beginning any bug fix and wants the full chain rather than ad-hoc steps. For spec-driven feature work use the project's feature workflow instead — this is the bug-work counterpart.
+description: Orchestrate a bug fix end-to-end — triage, branch, root-cause, fix, validate, live-verify, record the lesson, PR, and the bug-tracker writeback. GUIDED, not autonomous — it runs each phase but stops at the genuine decision points (which fix approach, a design tradeoff, whether to push) so you stay in control; its job is to make sure no step gets skipped, not to decide for you. Composes the existing skills (bug-triage, diagnose, live-verify, pr-details, pr-comment-triage) rather than reimplementing them, and owns the git/branch discipline, the investigation, and the tracker fields. Branch, base, test commands and tracker fields come from the project profile. Use when the user says "take bug NN", "fix this bug", "start on this bug", "work the bug sheet", or is beginning any bug fix and wants the full chain rather than ad-hoc steps. For spec-driven feature work use the project's feature workflow instead — this is the bug-work counterpart.
 allowed-tools:
   - Bash
   - Read
@@ -13,6 +13,7 @@ allowed-tools:
   - Skill
   - ToolSearch
 user-invocable: true
+disable-model-invocation: true
 ---
 
 # bugfix — guided bug-fix orchestration
@@ -78,24 +79,23 @@ Get this right up front; rebasing later is where dead code and phantom conflicts
 
 ```bash
 git fetch origin <base> --quiet
-git switch -c <branch per {branch_format}, e.g. bugfix/<topic>/bug<NN>-<short-slug>> origin/<base>
+git switch -c <branch per {branch_format}, e.g. bugfix/<topic>/bug<NN>-<short-slug>> --no-track origin/<base>
 ```
 
 - **Base** is one of `{topic_bases}` when the bug belongs to that train, `{default_base}` otherwise — confirm which, don't assume. Never create or commit to a `{protected}` branch.
 - Always branch from the **freshly fetched** remote base, never from whatever is checked out.
+- Keep `--no-track`: without it the new branch tracks the base, and a bare `git push` goes straight to the base.
 - If the fix depends on another in-flight PR, say so and ask whether to base on it or wait — don't silently stack.
 - Uncommitted work in the tree carries over on `switch -c`; check `git status` first and confirm that's intended.
 
 ### 3. Investigate — root cause, not symptom
 
-This is the phase worth spending time on. Trace the actual failure to a specific line, and **prove it** rather than asserting it:
+This is the phase worth spending time on. Run the **`diagnose`** skill with `--cause-only` and the bug's expected / actual / where. It builds a command that reproduces the bug red before any theory, shrinks the case, rules out hypotheses by probe, follows the whole path and the sibling, and proves the cause at `file:line` by flipping the loop red → green. It also saves the loop file that phase 8 uses as evidence.
 
-- **Reproduce the condition** — via the API, a unit test, or a live probe. A bug you can't reproduce is a bug you can't verify fixed.
-- **Follow the whole path** — FE handler → API wrapper → endpoint → backend usecase. The cause is often a layer away from the symptom (a "stuck loader" was really a request the backend 400s; a "success toast lying" was a 200-always endpoint with per-item statuses).
-- **Read the sibling.** If a mirrored feature does the same thing correctly, that sibling is both the diagnosis and the fix template. Look for `// mirrors X` comments and create↔edit twins.
+- **If diagnose cannot get red**, that is a checkpoint-1 finding, not a reason to theorize: the bug may be already fixed, need data you lack, or be misreported. Report it and ask.
 - **Check the report is right.** Reported tier/scope is sometimes wrong. Verify against the code and say so if it differs.
 
-Cite `file:line` for the cause. If several fix shapes exist, enumerate them with consequences.
+Carry diagnose's cause, flip output and fix shapes (each with its consequence) into the checkpoint.
 
 **→ Checkpoint 2.** Present the root cause and the fix options. Recommend one. Wait.
 
@@ -103,7 +103,7 @@ Cite `file:line` for the cause. If several fix shapes exist, enumerate them with
 
 - **Match the sibling.** If an equivalent feature already solves this, mirror it — including the bits that look incidental (a toast's `autoHide` params, a shared classifier). Divergence is what reviewers flag.
 - **Minimal diff.** No drive-by refactors, no reformatting other authors' lines. If pre-existing problems sit next to your change, note them; don't fix them here.
-- **Tests alongside.** Follow the project's own test rules (`CLAUDE.md`, `.claude/rules/`, contributing docs) — typically: mock only at the HTTP boundary (`{client_layer}`), run the real wrappers, read toasts back from the real provider.
+- **Tests alongside.** Turn diagnose's loop into the regression test at a real seam, and show it red without the fix and green with it. Follow the project's own test rules (`CLAUDE.md`, `.claude/rules/`, contributing docs) — typically: mock only at the HTTP boundary (`{client_layer}`), run the real wrappers, read toasts back from the real provider.
 - Keep comments short and about *why*. **Never write a bug number into code or code comments** — the codebase outlives the tracker and its numbers mean nothing to other readers; bug numbers belong in the PR body and the tracker only.
 
 **MANDATORY — run the dependent test suites, not just the package you edited.** The package you changed being green proves nothing about the suites that assert on its output. Before any push:
@@ -159,7 +159,7 @@ If nothing qualifies, say so explicitly in the final report ("no durable lesson 
 
 - Commit with a `type(scope): summary` message describing the *behavior* change. **Never put the bug number in a commit message** — bug numbers live in the PR body only (the history outlives the tracker; its numbers mean nothing to other readers).
 - If the touched file carries pre-existing formatting drift from other authors, commit with `--no-verify` so the hook doesn't pull their lines into your diff — and say that you did.
-- **Draft by default.** Use **`pr-details`** to produce the title and body, hand them over in fenced code blocks for copy-paste, and stop. Run `gh pr create` only if the user explicitly asks; if they create it by hand, don't append the repo's PR template — their manual flow supplies it. Title format: `{pr_title_format}` (list both ids when bugs are paired). In the body, write tracker bug numbers **without `#`** — on GitHub `#48` auto-links to an unrelated issue/PR; a real PR reference (e.g. the PR that already shipped a fix) keeps its `#` on purpose.
+- **Draft by default.** Use **`pr-details`** to produce the title and body, pointing it at the diagnose loop file and the live-verify table so its Evidence section shows before → after and its Merge danger line is filled, hand them over in fenced code blocks for copy-paste, and stop. Run `gh pr create` only if the user explicitly asks; if they create it by hand, don't append the repo's PR template — their manual flow supplies it. Title format: `{pr_title_format}` (list both ids when bugs are paired). In the body, write tracker bug numbers **without `#`** — on GitHub `#48` auto-links to an unrelated issue/PR; a real PR reference (e.g. the PR that already shipped a fix) keeps its `#` on purpose.
 - **Never push without explicit approval.** Pushing is a checkpoint-3 action every time, not once per run.
 - **Post-push etiquette.** Before the branch is pushed: fold review/validator fixes into the right commit with `--fixup` + autosquash. **After the PR is live: new commits on top, never amend/force-push** — reviewers and bots need to see explicit fix commits, and a force-push invalidates their read.
 - When review comments arrive, invoke **`pr-comment-triage`**. Fix what's valid, decline what isn't *with evidence*, and re-run the validator if the fixes were substantive.
@@ -191,6 +191,7 @@ When unsure, run the heavier tier — a skipped live-verify on a "simple" fix is
 | Need | Use |
 |---|---|
 | Which bug to take / is it available | `bug-triage` |
+| Reproduce, shrink and prove the root cause | `diagnose --cause-only` — phase 3 |
 | Prove the fix works in the app | `live-verify` |
 | PR title + body | `pr-details` |
 | Handle review comments | `pr-comment-triage` |
@@ -202,4 +203,4 @@ Each owns its capability. Your job is sequencing them, carrying context between 
 
 ## Reporting
 
-Close with what actually happened: the root cause (`file:line`), the fix and why that shape, validator verdict **and which memories were fed into it**, live-verification evidence per branch, what you deliberately left out of scope, and the PR link. If a step was skipped, say which and why — a silent skip is the failure this skill exists to prevent. In particular, never let "validator APPROVED" stand in for coverage it doesn't have: if no memory reached the audit, say that plainly.
+Close with what actually happened: the root cause (`file:line`) with the loop command that proves it, the fix and why that shape, validator verdict **and which memories were fed into it**, live-verification evidence per branch, what you deliberately left out of scope, and the PR link. If a step was skipped, say which and why — a silent skip is the failure this skill exists to prevent. In particular, never let "validator APPROVED" stand in for coverage it doesn't have: if no memory reached the audit, say that plainly.

@@ -1,9 +1,10 @@
 ---
 name: gh-pr-merge
-description: "Merge a pull request on GitHub only after the project's merge gate is verified and the user explicitly confirms — the designated final reviewer's latest review is APPROVED and newer than the last base change, reviewDecision APPROVED, mergeStateStatus CLEAN, checks green, threads resolved, not a draft, base branch as expected, the user is the assignee — then merges with the configured merge method, deletes the head branch unless protected, cleans up the local branch and reminds which tracker status to set. Never enables auto-merge, never force-merges. Use whenever the user says \"merge this PR\", \"merge PR 123\", \"is this ready to merge\", \"can I merge now\", or after the final approval lands."
+description: "User-only: run only when the user types /gh-pr-merge. Merge a pull request on GitHub only after the project's merge gate is verified and the user explicitly confirms — the designated final reviewer's latest review is APPROVED and newer than the last base change, reviewDecision APPROVED, mergeStateStatus CLEAN, checks green, threads resolved, not a draft, base branch as expected, the user is the assignee — then merges with the configured merge method, deletes the head branch unless protected, cleans up the local branch and reminds which tracker status to set. Never enables auto-merge, never force-merges. Use whenever the user says \"merge this PR\", \"merge PR 123\", \"is this ready to merge\", \"can I merge now\", or after the final approval lands."
 ---
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
+> - User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.
 > - `ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion).
 > - `ARGS` means whatever the user typed after `/<this-skill>`, or the request that triggered it.
 

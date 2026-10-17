@@ -1,7 +1,11 @@
 ---
 name: action-first
-description: "Shape output for fast triage work — answer first, numbered steps, state restated each turn, no preamble or closers, cause claims backed by evidence or a named diagnostic. Invoke with /action-first; stays on until \"normal output\"."
+description: "User-only: run only when the user types /action-first. Shape output for fast triage work — answer first, numbered steps, state restated each turn, no preamble or closers, cause claims backed by evidence or a named diagnostic. Invoke with /action-first; stays on until \"normal output\"."
 ---
+
+> **Running in Antigravity**: this skill is generated from the Claude Code source.
+> - User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.
+
 # Action-first output
 
 For ticket-to-PR work: triage a report, locate the cause, patch, test, write the PBI.
