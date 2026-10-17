@@ -53,6 +53,7 @@ docs:
   memory_dir: ""                   # where the assistant keeps lessons, if your tool has a memory folder
   loop_dir: .ai-toolbox/loops      # where /diagnose saves reproduction loops (pr-details reads them as evidence)
   handoff_dir: .ai-toolbox/handoffs   # where /handoff writes and --resume reads handoff files
+  research_dir: .ai-toolbox/research # where /research saves cited notes
 
 api:
   client_layer: ""                 # where the frontend's request functions live
