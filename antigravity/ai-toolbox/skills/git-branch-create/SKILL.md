@@ -82,7 +82,7 @@ Ask once with `ask_question`, showing the name, the base, the base's latest comm
 ## Step 6 — Create
 
 ```bash
-git switch -c "$NAME" "origin/$BASE"
+git switch -c "$NAME" --no-track "origin/$BASE"   # without --no-track, a bare push goes to the base
 git branch -vv
 ```
 

@@ -79,11 +79,12 @@ Get this right up front; rebasing later is where dead code and phantom conflicts
 
 ```bash
 git fetch origin <base> --quiet
-git switch -c <branch per {branch_format}, e.g. bugfix/<topic>/bug<NN>-<short-slug>> origin/<base>
+git switch -c <branch per {branch_format}, e.g. bugfix/<topic>/bug<NN>-<short-slug>> --no-track origin/<base>
 ```
 
 - **Base** is one of `{topic_bases}` when the bug belongs to that train, `{default_base}` otherwise — confirm which, don't assume. Never create or commit to a `{protected}` branch.
 - Always branch from the **freshly fetched** remote base, never from whatever is checked out.
+- Keep `--no-track`: without it the new branch tracks the base, and a bare `git push` goes straight to the base.
 - If the fix depends on another in-flight PR, say so and ask whether to base on it or wait — don't silently stack.
 - Uncommitted work in the tree carries over on `switch -c`; check `git status` first and confirm that's intended.
 

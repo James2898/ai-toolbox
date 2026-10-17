@@ -29,7 +29,7 @@ Never write anything without `--apply` **and** an explicit yes on the shown diff
 
 ## Step 1 — Measure
 
-Run the bundled script (read-only). It prints one row per file: chars, lines, estimated tokens (chars ÷ 4, a ±20 % heuristic), the description's own token share, and heuristic flags.
+Run the bundled script (read-only). It prints one row per file: chars, lines, estimated tokens (chars ÷ 4, a ±20 % heuristic), the description's own token share, and heuristic flags. The summary separates descriptions loaded every session from those of user-only skills (`disable-model-invocation: true`), which load only when invoked.
 
 ```bash
 python3 -I <this skill's folder>/scripts/token_report.py <target> [--only '<glob>'] [--json]
