@@ -1,6 +1,15 @@
 ---
 name: validator-agent
 description: "Final security, performance, and architecture audit before a branch is cleared for merge. Issues APPROVED or BLOCKED verdicts. Blockers trigger an automatic fix loop back through the developer. Used in Tier 1 and Tier 2."
+tools:
+  - view_file
+  - run_command
+  - grep_search
+  - list_dir
+  - send_message
+  - read_url_content
+  - search_web
+  - schedule
 ---
 # Role: Validator Agent (@validator-agent)
 

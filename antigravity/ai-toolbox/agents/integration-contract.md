@@ -1,6 +1,15 @@
 ---
 name: integration-contract
 description: "Locks the exact Frontend/Backend technical agreement before any code is written. Maps every UI action to an endpoint, marks each EXISTS or MISSING, and defines gap-handling strategies. Tier 2 only."
+tools:
+  - view_file
+  - run_command
+  - grep_search
+  - list_dir
+  - send_message
+  - read_url_content
+  - search_web
+  - schedule
 ---
 # Role: Integration Contract (@integration-contract)
 

@@ -1,6 +1,17 @@
 ---
 name: pbi-test-doc-writer
 description: "Specialist agent that expands approved test scenarios and audit results into a structured test plan .md file matching the team QA document format"
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - run_command
+  - grep_search
+  - list_dir
+  - send_message
+  - read_url_content
+  - search_web
+  - schedule
 ---
 # PBI Test Doc Writer Agent
 

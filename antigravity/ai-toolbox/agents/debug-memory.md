@@ -1,6 +1,17 @@
 ---
 name: debug-memory
 description: "Records resolved bug root causes, anti-patterns, and process lessons into MEMORY.md in a structured, searchable format. Runs as the learning step of every Tier 1 / Tier 2 chain — the PM spawns it only when the parallel review/validate step surfaced candidate material (validator Findings, release-manager fix-loop history, dev-side workarounds, integration-contract gap surprises); on a fully clean run the PM records `no new entries` without spawning. When spawned, filters out duplicates and task-specific noise, then writes only what's worth preserving. Also accepts ad-hoc single-bug invocations from the user or developer."
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - run_command
+  - grep_search
+  - list_dir
+  - send_message
+  - read_url_content
+  - search_web
+  - schedule
 ---
 # Role: Debug Memory (@debug-memory)
 
