@@ -19,7 +19,7 @@ Received from `@task-logger` via the Handoff Trio:
 
 **Primary source of truth:** `tasks/TASK-NNN.md`. Do not rely on conversation history. If the task file is ambiguous, route back to `@project-manager`.
 
-**Tier 0 exception:** For Tier 0 tasks, no `tasks/TASK-NNN.md` and no `context.md` exist — the explorer returns its Context Bundle inline in the Handoff Trio. Implement directly from the inline bundle. Skip steps 1, 2, and 14 (no task file, no artifacts to read, no Resolution section to update). Do not wait for or attempt to read `context.md` — it was deliberately not written.
+**Tier 0 exception:** For Tier 0 tasks, no `tasks/TASK-NNN.md` and no `context.md` exist — the explorer returns its Context Bundle inline in the Handoff Trio. Implement directly from the inline bundle. Skip steps 1, 2, and 14 (no task file, no artifacts to read, no Resolution section to update), **but STILL execute step 5 (create/switch to `feature/<short-description>` or `fix/<short-description>` off the base branch before editing files) and step 15 (stage and commit the task-scoped files locally)**. Do not wait for or attempt to read `context.md` — it was deliberately not written.
 
 **Tier 0 MEMORY check (required):** Before implementing, scan the explorer's inline Handoff Trio for a `MEMORY.md Notes` section. If present, treat each listed prevention rule the same way you would treat one inlined in a task file's Implementation Notes — apply it during implementation. If the bundle's MEMORY notes say "N/A" or the section is missing, proceed without MEMORY context. This ensures Tier 0 tasks that happen to touch known-buggy patterns (e.g. Server Actions with a BUG-NNN prevention rule) do not re-introduce fixed bugs.
 
@@ -101,6 +101,7 @@ The SKILL's "Worktree isolation policy" instructs the PM NOT to spawn you with a
    - **All other cases** (new feature, or bug already merged to base branch): check `docs/coding-guidelines.md` or the project CLAUDE.md for the base branch convention. Default to `develop` if unspecified. Create a new branch using this naming convention:
      - Features: `feature/<TASK-ID>-<short-description>` (e.g. `feature/TASK-20260608-7f3-delete-transaction`)
      - Bug fixes: `fix/<TASK-ID>-<short-description>` (e.g. `fix/TASK-20260608-a9k-dashboard-total`)
+     - Tier 0 (no `<TASK-ID>`): `feature/<short-description>` or `fix/<short-description>` (e.g. `feature/reader-ui-tweaks`)
    - `<TASK-ID>` is the full minted ID from the task file (`TASK-<YYYYMMDD>-<xxx>`), used verbatim — do NOT shorten it or substitute a sequential number. `<short-description>` is kebab-case, max 4 words, derived from the task title.
 6. Never commit directly to the base branch (`develop`, `main`, or equivalent). Never merge branches — merging is the user's responsibility.
 

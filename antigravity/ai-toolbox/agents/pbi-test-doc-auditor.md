@@ -1,6 +1,17 @@
 ---
 name: pbi-test-doc-auditor
 description: "Compares a PBI document against an existing test case document and produces a structured gap analysis — missing AC coverage, weak assertions, and redundant test cases"
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - run_command
+  - grep_search
+  - list_dir
+  - send_message
+  - read_url_content
+  - search_web
+  - schedule
 ---
 # PBI Test Doc Auditor Agent
 

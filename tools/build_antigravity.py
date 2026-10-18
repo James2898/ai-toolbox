@@ -27,6 +27,42 @@ AGY_PATH = f"~/.gemini/config/plugins/{PLUGIN}"
 
 SKIP_PARTS = {"evals", "__pycache__"}
 MANIFEST_KEYS = {"name", "displayName", "description", "version", "suggestedPrompts", "logo", "disabled"}
+WRITE_AGENTS = {
+    "fullstack-developer",
+    "task-logger",
+    "release-manager",
+    "debug-memory",
+    "pbi-test-doc-auditor",
+    "pbi-test-doc-generator",
+    "pbi-test-doc-writer",
+}
+SEARCH_AGENTS = {
+    "codebase-explorer",
+    "validator-agent",
+    "integration-contract",
+}
+WRITE_TOOLS = [
+    "view_file",
+    "write_to_file",
+    "replace_file_content",
+    "run_command",
+    "grep_search",
+    "list_dir",
+    "send_message",
+    "read_url_content",
+    "search_web",
+    "schedule",
+]
+SEARCH_TOOLS = [
+    "view_file",
+    "run_command",
+    "grep_search",
+    "list_dir",
+    "send_message",
+    "read_url_content",
+    "search_web",
+    "schedule",
+]
 
 TOOL_MAP = {"Read": "view_file", "Write": "write_to_file", "Edit": "replace_file_content",
             "MultiEdit": "replace_file_content", "Bash": "run_command", "Grep": "grep_search",
@@ -83,7 +119,13 @@ def render(fields, body, original, kind):
         desc = f"User-only: run only when the user types /{fields['name']}. {desc}"
         notes.insert(0, "User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.")
     desc = desc.replace("\\", "\\\\").replace('"', '\\"')
-    out = f"---\nname: {fields['name']}\ndescription: \"{desc}\"\n---\n"
+    extra = ""
+    if kind == "subagent":
+        if fields["name"] in WRITE_AGENTS:
+            extra = "tools:\n" + "".join(f"  - {t}\n" for t in WRITE_TOOLS)
+        elif fields["name"] in SEARCH_AGENTS:
+            extra = "tools:\n" + "".join(f"  - {t}\n" for t in SEARCH_TOOLS)
+    out = f"---\nname: {fields['name']}\ndescription: \"{desc}\"\n{extra}---\n"
     if notes:
         out += (f"\n> **Running in Antigravity**: this {kind} is generated from the Claude Code source.\n"
                 + "".join(f"> - {n}\n" for n in notes) + "\n")

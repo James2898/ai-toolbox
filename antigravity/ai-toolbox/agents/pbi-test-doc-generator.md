@@ -1,6 +1,17 @@
 ---
 name: pbi-test-doc-generator
 description: "Specialist agent that parses a PBI document, audits the codebase against each acceptance criterion, and drafts test scenarios grouped by category"
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - run_command
+  - grep_search
+  - list_dir
+  - send_message
+  - read_url_content
+  - search_web
+  - schedule
 ---
 # PBI Test Doc Generator Agent
 

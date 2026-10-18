@@ -1,6 +1,17 @@
 ---
 name: task-logger
 description: "Consolidates all upstream decisions, specs, and schemas into a single self-contained tasks/TASK-NNN.md file. The developer implements from this file alone — no conversation history needed. Used in Tier 1 and Tier 2."
+tools:
+  - view_file
+  - write_to_file
+  - replace_file_content
+  - run_command
+  - grep_search
+  - list_dir
+  - send_message
+  - read_url_content
+  - search_web
+  - schedule
 ---
 
 > **Running in Antigravity**: this subagent is generated from the Claude Code source.
