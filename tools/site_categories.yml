@@ -1,0 +1,51 @@
+# Catalog site categories: every skill in claude/skills/ must appear exactly once.
+# tools/build_site.py fails on an unmapped, unknown or duplicated skill.
+# Order here is the order on the page.
+
+QA documents:
+  - test-plan
+  - test-matrix
+  - test-data
+  - export-csv
+  - api-test
+  - scenario-test
+  - regression-test
+  - live-verify
+
+Spec & PBI:
+  - design-grill
+  - pbi-analyze
+  - pbi-executive-review
+  - pbi-gen-test-doc
+  - pbi-audit-test-doc
+  - to-questionnaire
+
+Debug & fix:
+  - diagnose
+  - bugfix
+  - bug-triage
+  - research
+
+PR & review:
+  - pr-details
+  - pr-peer-review
+  - pr-comment-triage
+  - self-review
+  - gh-pr-approve
+  - gh-pr-merge
+
+Git:
+  - git-branch-create
+
+Orchestration & session:
+  - project-manager
+  - handoff
+  - retro
+  - action-first
+  - token-optimize
+  - setup-profile
+
+Explain & demo:
+  - gg-explain
+  - irl-explain
+  - demo-guide
