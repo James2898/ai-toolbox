@@ -5,7 +5,7 @@ description: "User-only: run only when the user types /retro. Look back at a wor
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
 > - User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.
-> - **Display First Guard**: Do NOT call the `ask_question` tool modal to prompt for selection. In Antigravity, `ask_question` renders a blocking UI modal that prevents the user from reading the retro investigation table and diffs. ALWAYS render the entire retro report (table, friction quotes, ratings, and exact diffs) in regular markdown response text first, and ask for user selection via plain text at the end.
+> - `ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion).
 > - Paths under `~/.claude/` belong to Claude Code and may not exist here; skip steps that only use them and say so.
 
 # retro — fix the setup, not just the session
@@ -77,7 +77,7 @@ Before the table, re-check each finding's evidence with a command: a claim that 
 
 Rank by turns it would save across future sessions times how often the cause recurs. Rate each ⭐1–5 with a one-line reason. Leave out fixes for one-off accidents.
 
-Output the complete table and item descriptions as regular markdown text, then ask the user in plain text which to apply (e.g. "Which of these would you like to apply: all, specific numbers, or none?"). Do NOT use the `ask_question` modal here so the user can review all details on screen.
+Output the complete table and item descriptions as regular markdown text, then ask the user in plain text which to apply (e.g. "Which of these would you like to apply: all, specific numbers, or none?"). Do NOT use the interactive question modal (`ask_question` / `ask_question`) here so the user can review all details on screen before answering.
 
 ### 4. Apply only what was picked
 
