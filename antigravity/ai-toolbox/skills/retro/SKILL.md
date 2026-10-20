@@ -77,7 +77,7 @@ Before the table, re-check each finding's evidence with a command: a claim that 
 
 Rank by turns it would save across future sessions times how often the cause recurs. Rate each ⭐1–5 with a one-line reason. Leave out fixes for one-off accidents.
 
-Then ask which to apply, with one multi-select question.
+Output the complete table and item descriptions as regular markdown text, then ask the user in plain text which to apply (e.g. "Which of these would you like to apply: all, specific numbers, or none?"). Do NOT use the interactive question modal (`ask_question` / `ask_question`) here so the user can review all details on screen before answering.
 
 ### 4. Apply only what was picked
 
