@@ -372,6 +372,12 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
     "irl-explain",
     "demo-guide"
    ]
+  },
+  {
+   "name": "Writing",
+   "skills": [
+    "humanizer"
+   ]
   }
  ],
  "skills": [
@@ -598,6 +604,24 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "extras": [],
    "path": "claude/skills/handoff/SKILL.md",
    "agy_path": "antigravity/ai-toolbox/skills/handoff/SKILL.md"
+  },
+  {
+   "name": "humanizer",
+   "description": "Rewrite text that reads as machine-written so it sounds like a person wrote it, without changing what it says. Finds the tells by family (announcing instead of saying, rhythm by rule, inflated significance and borrowed authority, decorative formatting, chat leftovers, writing for the wrong reader), rewrites whole paragraphs around their point instead of swapping words, matches a writing sample when one is given, and checks the result against the original so no fact is added or lost. Code, commands, paths, URLs and metadata are never touched. Three modes: chat (tells found + rewrite), file (edits the prose in a named file in place), embedded (final text only, for other skills such as pr-details). Use whenever the user asks to humanize, de-AI, make it sound less like ChatGPT/AI, make it sound natural or like me, tighten or clean up prose, or wants a draft, PR description, doc, Slack reply or README rewritten to read like a person. Not an AI detector: it edits style and does not judge who wrote the text.",
+   "summary": "Rewrite text that reads as machine-written so it sounds like a person wrote it, without changing what it says.",
+   "user_only": false,
+   "tools": [
+    "Read",
+    "Edit",
+    "Write",
+    "Glob",
+    "AskUserQuestion"
+   ],
+   "writes": true,
+   "uses_agents": false,
+   "extras": [],
+   "path": "claude/skills/humanizer/SKILL.md",
+   "agy_path": "antigravity/ai-toolbox/skills/humanizer/SKILL.md"
   },
   {
    "name": "irl-explain",
