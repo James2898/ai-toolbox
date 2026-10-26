@@ -8,7 +8,7 @@ Make the smallest change that fully solves the task. Code that was never written
 
 ## Before you write
 
-Read the task and the code it touches. List every place the change has to reach: callers, tests, fixtures, config, exports, translation keys, sibling screens that share the code. Check what users could lose: data destroyed or exposed, callers that stop working. That list is the scope. Features nobody asked for are not.
+Read the task and the code it touches. List every place the change has to reach: callers, tests, fixtures, config, exports, translation keys, sibling screens that share the code. Check what users could lose: data destroyed or exposed, callers that stop working. That list is the scope. Features nobody asked for are not. When the code cannot show something the change depends on (an untyped response, a value from outside the repo), write down the assumption and name it in the closing line.
 
 In an agent chain, the reuse list is already in `codebase-explorer`'s **Reuse Candidates** (`tasks/TASK-NNN/context.md`). Read it there instead of searching again.
 
@@ -17,9 +17,9 @@ In an agent chain, the reuse list is already in `codebase-explorer`'s **Reuse Ca
 Take the first option that fully works:
 
 1. **Does it need to exist?** Skip features, options and flexibility nobody asked for, and name what you skipped in one line. A vague request gets the smallest version that does the core job.
-2. **Is it already in this codebase?** A helper, component, service or pattern. Use it the way the code around it does.
+2. **Is it already in this codebase?** A helper, component, service or pattern. Use it the way the code around it does. When two copies exist, use the one the surrounding code already imports, else the one in the shared layer (`lib`, `utils`, `common`), and name the other copy in one line instead of merging it unasked.
 3. **Does the standard library or the platform do it?** Use that, unless the project has its own version. A house component beats a native widget.
-4. **Does an installed dependency do it?** Use it. A **new** dependency needs the user's approval, and never for a few lines of code.
+4. **Does an installed dependency do it?** Use it. A **new** dependency needs the user's approval. Even when the user offers one ("feel free to add X"), say first when a few lines or something already installed does the job, and add it only if they still want it.
 5. **Can it be one line a reader understands at a glance?** Write one line.
 6. **Otherwise,** write the minimum code that works.
 
@@ -46,7 +46,7 @@ Take the first option that fully works:
 
 ## When part of the request looks unjustified
 
-Say so in one line before building, with the smaller alternative, and let the user choose. For PBI-sized work, point to `/design-grill` (is the request clear?) or `/code-grill` (is this the right way to build it?) instead of arguing inline.
+Say so in one line, with the smaller alternative. When the smaller option still gives the user everything they asked for, build it and name the bigger one; when it would leave out something they asked for, ask before building. For PBI-sized work, point to `/design-grill` (is the request clear?) or `/code-grill` (is this the right way to build it?) instead of arguing inline.
 
 ## Closing line
 
@@ -54,7 +54,7 @@ End a coding reply with one line: what you skipped or did not check, and any ris
 
 ## Precedence
 
-CLAUDE.md, the task file's acceptance criteria and Out of Scope, project rules, and an invoked skill's own output format all outrank this file. Where they say more, do more.
+CLAUDE.md, the task file's acceptance criteria and Out of Scope, project rules, and an invoked skill's own output format all outrank this file. Where they say more, do more. A plan written in a task file is input to this ladder, not a rule above it. When the user's request in chat and an acceptance criterion disagree, ask which wins instead of picking one.
 
 ---
 
