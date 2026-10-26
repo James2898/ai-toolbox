@@ -115,16 +115,12 @@ Single unified section covering functional verification **and** pre-merge checks
 - If no edge cases are derivable, add at least one: the behaviour when required data is missing or the network fails.
 
 **Role-Based Access** (omit this sub-group entirely if no role-gating is present in the diff or task file)
-- Include if the diff touches: `isMusicDirector`, `music_director` role checks, RLS policies, auth guards.
-- One `[ ]` per role mentioned (e.g. `music_director`, viewer/non-director, unauthenticated user).
+- Include if the diff touches role or permission checks, auth guards, row-level security or access policies.
+- One `[ ]` per role the diff or task file names, plus the unauthenticated user.
 
-**Pre-merge** (always present, fixed items)
-- [ ] TypeScript passes (`npx tsc --noEmit`)
-- [ ] No console errors in browser
-- [ ] RLS policies verified (include only if DB / RLS area is non-empty)
-- [ ] Mobile viewport tested
-- [ ] Dark mode tested
-- [ ] Vercel preview link attached
+**Pre-merge** (always present)
+- One `[ ]` per command in the profile's `commands.*` keys; with no profile, use the checks the repo actually defines (CI workflow jobs, `package.json` scripts such as type-check/lint/test, check scripts under `tools/` or `scripts/`). Never list a check the repo does not have.
+- Add "No console errors in browser" and "Mobile viewport tested" only when the Frontend bucket is non-empty, and "Access policies verified" only when the Data bucket touches them.
 
 ### 4f. Evidence
 
@@ -178,7 +174,7 @@ Print the complete PR title and body using this exact wrapper format so the user
 
 ## STEP 6: Offer to create the PR via gh
 
-Use `AskUserQuestion`:
+If the user's request already asked to open the PR, skip the question and create it. Otherwise use `AskUserQuestion`:
 
 > "Create the PR now via `gh pr create`? Target branch: `{base}`. (yes / no)"
 
