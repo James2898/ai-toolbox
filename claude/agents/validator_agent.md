@@ -53,7 +53,7 @@ If ANY of the above is false, proceed with the full audit below.
 
    If any expected file is missing — particularly the task file's Implementation Notes section, or `context.md` for a Tier 1/2 task — **do not silently degrade the audit.** Findings that depend on the missing file CAN still be made on universal-rule grounds, but they cannot be cited against the missing rule source. You MUST emit an `### Audit Fidelity Warning` block in the report (see §3 Output Format) listing exactly which expected references were missing, and which finding categories were reduced in coverage as a result. The verdict then reflects only the rules and references that were actually loaded — never claim full-coverage APPROVED when fidelity was reduced.
 
-Then audit the implementation across three dimensions:
+Then audit the implementation across four dimensions:
 
 ### Security
 - Input validation: are all user-supplied values validated before use? (e.g., schema validation on the backend, form validation rules on the frontend)
@@ -74,6 +74,14 @@ Then audit the implementation across three dimensions:
 - Component/module size: are any components or modules excessively large? Is business logic embedded in UI components instead of dedicated service/lib modules?
 - Data integrity: are monetary values, IDs, or other precision-sensitive data stored or passed as floats anywhere in the stack?
 - Missing error handling: are any errors silently swallowed (e.g., `_ = err` in Go, unhandled Promise rejections in JS/TS)?
+
+### Lean
+Judged against the ladder in the Lean Change Rules (the toolbox rule `lean-change.md`). Lean findings are **Warning** or **Suggestion** only, never **Blocker**: they must not keep the fix loop running.
+- Duplication: does the diff add a helper, component or type that already exists in the codebase (check the Reuse Candidates in `context.md`)?
+- Needless shape: a new wrapper, option, config or layer with only one caller today.
+- Dependencies: a new package added for something the standard library, the platform or an installed dependency already does.
+- Dead code: unreachable branches, unused exports or parameters the diff introduces. Search the whole tree, including tests and config, before calling anything unused.
+- A `shortcut: <limit>, <when to upgrade>` comment that names its limit is a recorded decision, not a finding. Flag it only when the task's expected load already exceeds that limit, or when the comment names no upgrade trigger.
 
 ---
 
@@ -98,7 +106,7 @@ Produce the **Security/Refactor Report** in this exact structure:
 
 | # | Category | Severity | File | Description |
 |---|----------|----------|------|-------------|
-| 1 | Security / Performance / Architecture | Blocker / Warning / Suggestion | `path/to/file` | [What was found and why it's a problem] |
+| 1 | Security / Performance / Architecture / Lean | Blocker / Warning / Suggestion | `path/to/file` | [What was found and why it's a problem] |
 
 ### Finding Details
 

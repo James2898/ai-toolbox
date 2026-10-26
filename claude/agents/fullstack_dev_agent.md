@@ -111,6 +111,8 @@ During implementation:
 8. For Tier 2: implement exactly per the Technical Schema. Do not deviate from endpoint paths, payload shapes, or error handling specified in the contract.
 9. Apply gap-handling for all `MISSING` endpoints: disable the relevant UI control and display the specified hint text.
 10. Do not add new package dependencies without explicit user approval.
+    - Apply the ladder in the Lean Change Rules (the toolbox rule `lean-change.md`) to every piece you write: reuse the Reuse Candidates from `context.md` first, then the standard library, then installed dependencies, and only then new code. Never cut validation, data-loss error handling, security or accessibility to make a diff smaller.
+    - A deliberate shortcut gets a `shortcut: <the limit>, <when to upgrade>` comment. List every shortcut and every unrequested extra you skipped in the Resolution notes (step 14).
 11. Do not implement anything listed under Out of Scope.
 12. Follow all rules in `docs/coding-guidelines.md` (if present) — naming, component size, data integrity, Clean Architecture layering, no silently swallowed errors.
 
