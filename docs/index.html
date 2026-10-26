@@ -349,6 +349,14 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    ]
   },
   {
+   "name": "Code health",
+   "skills": [
+    "code-grill",
+    "repo-audit",
+    "code-debt"
+   ]
+  },
+  {
    "name": "Git",
    "skills": [
     "git-branch-create"
@@ -453,6 +461,44 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "extras": [],
    "path": "claude/skills/bugfix/SKILL.md",
    "agy_path": "antigravity/ai-toolbox/skills/bugfix/SKILL.md"
+  },
+  {
+   "name": "code-debt",
+   "description": "Scan a repository's code comments for debt markers — FIXME, BUG, XXX, HACK, SECURITY, DO NOT SHIP, TEMP, TODO, WORKAROUND, DEPRECATED and the lean-change `shortcut: <limit>, <when to upgrade>` marker — and return one ranked ledger: P1 (the author knows it is wrong or unsafe), P2 (deferred work with a known gap), P3 (ideas), bumped a tier when the marker sits in a risk path (auth, money, migrations, data writes) or names no ticket or owner. Matches comment prefixes only, so strings and translations never count; skips vendored and gitignored files. --diff lists only the markers this branch adds. Read-only; --save writes the ledger to a file. Use whenever the user asks for TODOs, FIXMEs, tech debt, 'what did we defer', 'list the shortcuts', 'what's left to clean up', debt in this PR, or before an audit or a release.",
+   "summary": "Scan a repository's code comments for debt markers — FIXME, BUG, XXX, HACK, SECURITY, DO NOT SHIP, TEMP, TODO, WORKAROUND, DEPRECATED and the lean-change `shortcut: <limit>, <when to upgrade>` marker — and return one ranked ledger: P1 (the author knows it is wrong or unsafe), P2 (deferred work with a known gap), P3 (ideas), bumped a tier when the marker sits in a risk path (auth, money, migrations, data writes) or names no ticket or owner.",
+   "user_only": false,
+   "tools": [
+    "Bash",
+    "Read",
+    "Glob",
+    "Grep",
+    "Write"
+   ],
+   "writes": true,
+   "uses_agents": false,
+   "extras": [],
+   "path": "claude/skills/code-debt/SKILL.md",
+   "agy_path": "antigravity/ai-toolbox/skills/code-debt/SKILL.md"
+  },
+  {
+   "name": "code-grill",
+   "description": "Grill an implementation approach before any code is written — a task file, a plan, or 'I'm going to do X in Y' — and, with --diff, grill the branch's changes after coding. Works the lean-change ladder as questions: does each planned piece map to an AC, does it already exist in the codebase / standard library / an installed dependency, does a new abstraction, option or layer have two real callers, which callers, tests, fixtures and sibling screens does it reach, which failure modes are unhandled, is validation or a permission check being cut, which seam gets the test, and is there a smaller change that does the same job. Settles facts from the code itself (file:line), then interviews the user round by round with a recommended answer that 'yes' accepts, and closes with a decision record and the smallest plan. --diff adds plan drift and newly added debt markers. Read-only apart from a confirmed --append to the task file. Use whenever the user asks 'grill my approach', 'is this over-engineered', 'is there a simpler way', 'challenge this plan', 'grill the implementation', 'before I code this', 'grill this diff', or after task-logger and before the dev step. For an unclear request or spec, use design-grill; for findings with severities on a finished branch, use self-review.",
+   "summary": "Grill an implementation approach before any code is written — a task file, a plan, or 'I'm going to do X in Y' — and, with --diff, grill the branch's changes after coding.",
+   "user_only": false,
+   "tools": [
+    "Read",
+    "Glob",
+    "Grep",
+    "Bash",
+    "Edit",
+    "Agent",
+    "AskUserQuestion"
+   ],
+   "writes": true,
+   "uses_agents": true,
+   "extras": [],
+   "path": "claude/skills/code-grill/SKILL.md",
+   "agy_path": "antigravity/ai-toolbox/skills/code-grill/SKILL.md"
   },
   {
    "name": "demo-guide",
@@ -809,6 +855,25 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "agy_path": "antigravity/ai-toolbox/skills/regression-test/SKILL.md"
   },
   {
+   "name": "repo-audit",
+   "description": "Audit a whole repository, folder or package the way a senior developer who just inherited it would: map the entry points and data flows, then hunt in priority order for bugs, risks (security holes, data loss), scale problems at the stated load (races, N+1 queries, unbounded growth), risky logic with no test, real slowness, and lean problems (dead code, duplicated helpers, needless abstraction, dependencies the platform already covers). Every finding has a concrete triggering case and a re-read file:line; findings are numbered across Must fix / Should fix / Nice to have so the user can say 'fix 2 and 5', and the report lists what was not read. Runs the code-debt scan inline as leads. Read-only; --save writes the report. Use whenever the user asks to audit a codebase or module, 'what's wrong with this repo', 'find bloat', 'health check', 'what should we clean up', 'review the whole project', or is taking over unfamiliar code. For a branch or PR diff, use self-review or pr-peer-review instead.",
+   "summary": "Audit a whole repository, folder or package the way a senior developer who just inherited it would: map the entry points and data flows, then hunt in priority order for bugs, risks (security holes, data loss), scale problems at the stated load (races, N+1 queries, unbounded growth), risky logic with no test, real slowness, and lean problems (dead code, duplicated helpers, needless abstraction, dependencies the platform already covers).",
+   "user_only": false,
+   "tools": [
+    "Bash",
+    "Read",
+    "Glob",
+    "Grep",
+    "Write",
+    "Agent"
+   ],
+   "writes": true,
+   "uses_agents": true,
+   "extras": [],
+   "path": "claude/skills/repo-audit/SKILL.md",
+   "agy_path": "antigravity/ai-toolbox/skills/repo-audit/SKILL.md"
+  },
+  {
    "name": "research",
    "description": "Answer a technical question from primary sources and save a cited note: the project's own code and docs at file:line, official docs, specs and changelogs for the exact version the project pins, and the library's source; blogs and forum answers only as leads. Every claim carries its source and version, conflicts are shown, and anything unchecked is marked unverified. Use when the user asks to research, look up or confirm how a library, API, tool or standard behaves, compare options with evidence, or check whether something is still true for their version.",
    "summary": "Answer a technical question from primary sources and save a cited note: the project's own code and docs at file:line, official docs, specs and changelogs for the exact version the project pins, and the library's source; blogs and forum answers only as leads.",
@@ -1010,7 +1075,8 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "description": "Scans the codebase for reusable components, patterns, hooks, and API client conventions relevant to the task. Produces a Context Bundle so the developer never reinvents the wheel. Used in all tiers.",
    "model": "sonnet",
    "used_by": [
-    "project-manager"
+    "project-manager",
+    "repo-audit"
    ],
    "path": "claude/agents/codebase_explorer_agent.md"
   },
@@ -1031,6 +1097,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "description": "Implements features exactly as specified in the task file — no more, no less. Creates the feature branch, satisfies every acceptance criterion, handles MISSING endpoint gaps, and updates the task Resolution section on completion.",
    "model": null,
    "used_by": [
+    "code-grill",
     "project-manager"
    ],
    "path": "claude/agents/fullstack_dev_agent.md"
@@ -1360,6 +1427,11 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "title": "Agent Routing Rules",
    "summary": "These rules apply globally to all projects using the multi-agent workflow. Projects may extend these rules by adding project-specific rules in their own `.claude/rules/` directory.",
    "path": "claude/rules/agent-routing.md"
+  },
+  {
+   "title": "Lean Change Rules",
+   "summary": "Applies whenever you write or change code, in the main session and in agents that implement (such as `@fullstack-developer`). It does not apply to writing QA documents, specs, PBI analyses, explanations or prose.",
+   "path": "claude/rules/lean-change.md"
   }
  ],
  "profile": [
@@ -1546,6 +1618,16 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
      "key": "research_dir",
      "example": ".ai-toolbox/research # where /research saves cited notes",
      "comment": ""
+    },
+    {
+     "key": "audit_dir",
+     "example": ".ai-toolbox/audits",
+     "comment": "where /repo-audit --save writes reports"
+    },
+    {
+     "key": "debt_file",
+     "example": ".ai-toolbox/code-debt.md",
+     "comment": "where /code-debt --save writes the ledger"
     }
    ]
   },
@@ -1592,6 +1674,22 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    ]
   },
   {
+   "section": "code_debt",
+   "comment": "used by /code-debt (and the audits that call it)",
+   "keys": [
+    {
+     "key": "risk_paths",
+     "example": "",
+     "comment": "extra path regexes where a debt marker ranks one tier higher, e.g. [\"internal/billing/\"]"
+    },
+    {
+     "key": "markers",
+     "example": "",
+     "comment": "extra marker words your team uses, e.g. [\"TBD\", \"REVISIT\"]"
+    }
+   ]
+  },
+  {
    "section": "bug_tracker",
    "comment": "",
    "keys": [
@@ -1599,6 +1697,11 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
      "key": "source",
      "example": "csv",
      "comment": "csv export of the tracker"
+    },
+    {
+     "key": "ticket_pattern",
+     "example": "",
+     "comment": "regex for a ticket reference in comments, e.g. \"PBI-[0-9]+\"; empty = \"#123\" or \"ABC-123\""
     },
     {
      "key": "export_glob",
