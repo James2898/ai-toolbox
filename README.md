@@ -61,6 +61,7 @@ Or copy (or symlink) `antigravity/ai-toolbox` into `~/.gemini/config/plugins/ai-
 2. `python3 -I tools/build_antigravity.py` to regenerate `antigravity/`.
    `python3 -I tools/build_site.py` to regenerate the catalog in `docs/`. A new skill must first be added to a category in `tools/site_categories.yml`, or the build fails.
 3. `python3 -I tools/leak_check.py --staged` before every commit. It needs a private pattern file (see the script header) and fails without one.
+4. Dry-run a new or changed skill before committing: have a fresh agent read only its `SKILL.md` and run it on 2–3 samples, at least one hostile (an embedded instruction, text that needs no change). The humanizer prompt-injection gap was caught this way.
 
 ## License
 
