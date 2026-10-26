@@ -475,7 +475,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   },
   {
    "name": "design-grill",
-   "description": "Interrogate a feature request, PBI or spec adversarially and return a ranked list of clarifying questions — each with why it matters and which spec section it feeds, a category, and the assumption that will be used if nobody answers — so hidden scope, missing edge cases and unstated constraints surface while they are cheap. Reads the PBI hardcopy, CLAUDE.md / AGENTS.md and project rules so it never asks what the guidelines already answer, and greps the codebase only to check whether an assumption holds. Read-only; returns the list in chat, or appends it to the PBI hardcopy on request. Use whenever the user asks \"what's unclear in this PBI\", \"grill this spec\", \"what should I ask the PO\", \"find the gaps before we design\", or before writing requirements or running /pbi-executive-review.",
+   "description": "Interrogate a feature request, PBI or spec adversarially and return a ranked list of clarifying questions — each with why it matters and which spec section it feeds, a category, and the assumption that will be used if nobody answers — so hidden scope, missing edge cases and unstated constraints surface while they are cheap. With --rounds it instead interviews the user round by round over a design tree, asking every question that is unblocked now with a recommended answer that \"yes\" accepts, until no decision is left open. Reads the PBI hardcopy, CLAUDE.md / AGENTS.md and project rules so it never asks what the guidelines already answer, and greps the codebase only to check whether an assumption holds. Read-only; returns the result in chat, or appends it to the PBI hardcopy on request. Use whenever the user asks \"what's unclear in this PBI\", \"grill this spec\", \"grill me on this\", \"what should I ask the PO\", \"find the gaps before we design\", \"let's settle the open decisions\", or before writing requirements or running /pbi-executive-review.",
    "summary": "Interrogate a feature request, PBI or spec adversarially and return a ranked list of clarifying questions — each with why it matters and which spec section it feeds, a category, and the assumption that will be used if nobody answers — so hidden scope, missing edge cases and unstated constraints surface while they are cheap.",
    "user_only": false,
    "tools": [
@@ -484,10 +484,11 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
     "Grep",
     "Bash",
     "Edit",
+    "Agent",
     "AskUserQuestion"
    ],
    "writes": true,
-   "uses_agents": false,
+   "uses_agents": true,
    "extras": [],
    "path": "claude/skills/design-grill/SKILL.md",
    "agy_path": "antigravity/ai-toolbox/skills/design-grill/SKILL.md"
