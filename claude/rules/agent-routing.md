@@ -96,15 +96,20 @@ If the tech stack for a given layer is still TBD, do not assume a framework or l
 ## Headless Shells, Interactive Commands & Token Loop Guard
 
 In automated background or subagent execution shells:
-1. **No Interactive Auth Commands**: Never execute commands that prompt for interactive credentials (e.g. git push, gh auth login, ssh without key) unless pre-authenticated credentials or tokens are explicitly verified in the environment.
-2. **Immediate Task Cancellation on Wait**: If a background command stalls or waits on credentials (e.g. Git Credential Manager), do **not** enter a polling loop (manage_task status or sleep loops). Immediately terminate the stalled task and hand the exact command over to the user to run in their interactive terminal.
+1. **No Interactive Auth Commands**: Never execute commands that prompt for interactive credentials (e.g. `git push`, `gh auth login`, `ssh` without key) unless pre-authenticated credentials or tokens are explicitly verified in the environment.
+2. **Immediate Task Cancellation on Wait**: If a background command stalls or waits on credentials (e.g. Git Credential Manager), do **not** enter a polling loop (`manage_task status` or sleep loops). Immediately terminate the stalled task and hand the exact command over to the user to run in their interactive terminal.
 3. **Token Multiplication Prevention**: In sessions with large active context windows (100k+ tokens), repetitive polling or retry loops re-read the entire context on every turn, rapidly burning millions of tokens in minutes. Avoid repeated status checks on stalled processes.
+
+---
+
+## Git Operations Approval
+
+Never create a new git branch (`git checkout -b`, `git branch`) or commit changes (`git commit`) autonomously without explicit user approval. Always present the proposed branch name, staged diff/changes, and commit message to the user, and wait for confirmation before executing.
 
 ---
 
 ## Subagent Model Tiers & Tool Guardrail Preservation
 
 When configuring, modifying, or compiling subagents across platforms:
-1. **Never Strip Model Tiers**: Per-agent model specializations (sonnet/pro for architecture and validation; haiku/lash for scripters and loggers) are deliberate architectural choices for performance and cost. Map models across platforms instead of removing them.
-2. **Never Strip Tool Guardrails**: Tool restrictions (
-ead_file only vs write-enabled vs prompt-only) enforce least-privilege security boundaries. Map Claude tools to platform-native tools rather than giving all agents full system access.
+1. **Never Strip Model Tiers**: Per-agent model specializations (`sonnet`/`pro` for architecture and validation; `haiku`/`flash` for scripters and loggers) are deliberate architectural choices for performance and cost. Map models across platforms instead of removing them.
+2. **Never Strip Tool Guardrails**: Tool restrictions (`read_file` only vs write-enabled vs prompt-only) enforce least-privilege security boundaries. Map Claude tools to platform-native tools rather than giving all agents full system access.

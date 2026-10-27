@@ -14,3 +14,7 @@
   - **Context:** Automated agent subshells run non-interactively without access to OS-level credential dialogs (e.g. Windows Git Credential Manager OAuth or SSH passphrase popups).
   - **Failure Mode:** Stalled commands (e.g. `git push`) cause agents to enter repetitive polling loops (`manage_task status`). In large sessions (100k+ tokens), each polling step re-reads the full context window from the prompt cache, multiplying token consumption by millions in minutes (e.g. ~8.29M cumulative tokens across 105 polling steps).
   - **Resolution:** Never execute commands that may trigger interactive credential prompts in background tasks unless credentials/tokens are verified beforehand. If a background process waits on credentials or user input, cancel the task immediately; do not loop or poll. Hand the exact command and PR link to the user to run in their local interactive terminal.
+
+- **RULE-003** | 2026-10-28 | User Preference: `Explicit Approval for Git Branching & Commits`
+  - **Context:** Git branch creation and commit operations must always be human-approved.
+  - **Rule:** Never create a new git branch or commit changes without explicit user approval. Always propose the branch name, summary of changes, and commit message, and wait for confirmation before executing `git checkout -b`, `git branch`, or `git commit`.
