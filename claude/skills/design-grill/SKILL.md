@@ -83,19 +83,17 @@ The **frontier** is every open decision whose prerequisites are all settled. Ask
 
 Before asking, settle facts yourself: a question that needs a fact from the code or docs is not a question for the user. Check it with `Grep`/`Read`, or for a wide search spawn a read-only search subagent in the background (Claude Code: the built-in `Explore` agent); only the questions downstream of that fact wait for it, so ask the rest now.
 
-Post the round as a chat message, not `AskUserQuestion` (answers are free text and a round can hold more than four questions):
+Post the round as a chat message, not `AskUserQuestion` (answers are free text and a round can hold more than four questions). Format the questions as a table for readability:
 
 ```markdown
 ### Round <n> — <k> open, <m> settled
 
-**Q<n>.1 · <rank> · <short title>**: <the question, with the options when there are some>
-➡️ Recommended: <your answer, and the one-line reason or the `file:line` behind it>
+| # | Rank | Question | Options & Context | ➡️ Recommendation & Reason |
+|---|---|---|---|---|
+| **Q<n>.1** | blocker | <the question> | <concrete options or relevant context> | <your answer, and the one-line reason or the `file:line` behind it> |
+| **Q<n>.2** | major | … | … | … |
 
----
-
-**Q<n>.2 · …**
-
-Reply "yes" to accept every recommendation, or answer by number (`2: no, hard delete`). "ask PO" or "skip" parks a question.
+Reply "yes" to accept every recommendation, or answer by number (`1: separate duplicates, 2: strip models`). "ask PO" or "skip" parks a question.
 ```
 
 Word each question so that "yes" accepts the recommendation. Number questions by round (`Q2.3`) so later rounds can refer back.
