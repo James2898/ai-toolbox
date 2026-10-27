@@ -1,6 +1,6 @@
 ---
 name: validator-agent
-description: "Final security, performance, and architecture audit before a branch is cleared for merge. Issues APPROVED or BLOCKED verdicts. Blockers trigger an automatic fix loop back through the developer. Used in Tier 1 and Tier 2."
+description: "Final security, performance, architecture and lean audit before a branch is cleared for merge. Issues APPROVED or BLOCKED verdicts. Blockers trigger an automatic fix loop back through the developer. Used in Tier 1 and Tier 2."
 tools:
   - view_file
   - run_command

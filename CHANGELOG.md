@@ -1,6 +1,6 @@
 # Changelog
 
-Changes to the ai-toolbox skills, agents, rules, hooks and build tools, newest first. Only merged work is listed, dated by the day its pull request merged. The catalog site renders this file as `docs/changelog.html`.
+Changes to the ai-toolbox skills, agents, rules, hooks and build tools, newest first. Only merged work is listed, dated by the day its pull request merged.
 
 ## 2026-10-26
 
