@@ -2,6 +2,22 @@
 
 Changes to the ai-toolbox skills, agents, rules, hooks and build tools, newest first. Only merged work is listed, dated by the day its pull request merged.
 
+## 2026-10-27
+
+### Added
+- `lean-change` rule: an always-on ladder for code changes (does it need to exist → already in the codebase → standard library → installed dependency → one line → minimum code), a never-cut list (validation, data-loss handling, security, accessibility, anything asked for) and the `shortcut: <limit>, <when to upgrade>` comment. Adapted from [ponytail](https://github.com/DietrichGebert/ponytail) v5.3.2 (MIT). ([#9](https://github.com/James2898/ai-toolbox/pull/9))
+- `code-grill` skill: grills an implementation approach round by round before coding, in ladder order, and closes with a decision record and the smallest plan. `--diff` grills the branch afterwards for plan drift and new debt markers. ([#9](https://github.com/James2898/ai-toolbox/pull/9))
+- `repo-audit` skill: read-only audit of a whole repository or package, ranked as Must fix / Should fix / Nice to have, each finding with a triggering case and a re-read `file:line`. Secrets are reported by location and type, never by value. ([#9](https://github.com/James2898/ai-toolbox/pull/9))
+- `code-debt` skill: ranked ledger of FIXME, HACK, TODO, `shortcut:` and other markers in code comments, bumped for risk paths and untracked work. `--diff` lists only what a branch adds; `--ref` scans a branch without checking it out. ([#9](https://github.com/James2898/ai-toolbox/pull/9))
+- Catalog: a **Code health** category, and this changelog page, generated from `CHANGELOG.md` and linked from the catalog header. ([#9](https://github.com/James2898/ai-toolbox/pull/9))
+- Profile keys: `docs.audit_dir`, `docs.debt_file`, `code_debt.risk_paths`, `code_debt.markers`, `bug_tracker.ticket_pattern`. ([#9](https://github.com/James2898/ai-toolbox/pull/9))
+
+### Changed
+- `fullstack-developer` applies the lean-change ladder as its own rule and lists shortcuts and skipped extras in the task Resolution. ([#9](https://github.com/James2898/ai-toolbox/pull/9))
+- `validator-agent` audits a fourth dimension, Lean. Lean findings are Warning or Suggestion only, so they never start the fix loop. ([#9](https://github.com/James2898/ai-toolbox/pull/9))
+- `codebase-explorer` notes when the standard library, the platform or an installed dependency already covers part of a task. ([#9](https://github.com/James2898/ai-toolbox/pull/9))
+- README: changelog entries are added after a PR merges, and the dry-run step describes a shared fixture repo and ref-based branch handling. ([#9](https://github.com/James2898/ai-toolbox/pull/9))
+
 ## 2026-10-26
 
 ### Added
