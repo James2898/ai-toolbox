@@ -81,9 +81,14 @@ Never `--auto`, never `--admin`, never a different method than confirmed.
 ```bash
 git fetch origin <base>
 git switch <base> && git pull --ff-only
-git branch -d <head>
 {post_merge_command}   # if set, e.g. a submodule sync
 ```
+
+**Branch / Worktree Cleanup Prompting:**
+- Never delete the local branch automatically. Prompt the user whether to delete the local branch (`git branch -d <head>`).
+- If working inside a **linked git worktree**:
+  - Do **not** remove the worktree automatically.
+  - Prompt the user whether to remove the worktree and its branch (e.g., `git worktree remove <worktree-path> && git branch -d <head>`), and wait for confirmation.
 
 ## Step 6 — Report
 
