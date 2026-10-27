@@ -99,6 +99,7 @@ In automated background or subagent execution shells:
 1. **No Interactive Auth Commands**: Never execute commands that prompt for interactive credentials (e.g. `git push`, `gh auth login`, `ssh` without key) unless pre-authenticated credentials or tokens are explicitly verified in the environment.
 2. **Immediate Task Cancellation on Wait**: If a background command stalls or waits on credentials (e.g. Git Credential Manager), do **not** enter a polling loop (`manage_task status` or sleep loops). Immediately terminate the stalled task and hand the exact command over to the user to run in their interactive terminal.
 3. **Token Multiplication Prevention**: In sessions with large active context windows (100k+ tokens), repetitive polling or retry loops re-read the entire context on every turn, rapidly burning millions of tokens in minutes. Avoid repeated status checks on stalled processes.
+4. **CLI Path Resolution on Windows**: When CLI tools like `gh` are not found on the default session `$env:PATH`, inspect standard locations (such as `C:\Program Files\GitHub CLI\gh.exe`) before assuming they are uninstalled.
 
 ---
 
@@ -113,6 +114,14 @@ Never create a new git branch (`git checkout -b`, `git branch`) or commit change
 When configuring, modifying, or compiling subagents across platforms:
 1. **Never Strip Model Tiers**: Per-agent model specializations (`sonnet`/`pro` for architecture and validation; `haiku`/`flash` for scripters and loggers) are deliberate architectural choices for performance and cost. Map models across platforms instead of removing them.
 2. **Never Strip Tool Guardrails**: Tool restrictions (`read_file` only vs write-enabled vs prompt-only) enforce least-privilege security boundaries. Map Claude tools to platform-native tools rather than giving all agents full system access.
+
+---
+
+## Antigravity Local Plugin Discovery (Windows)
+
+When deploying or linking local plugins on Windows (`~/.gemini/config/plugins/<name>`):
+- **Never Use Directory Junctions (`mklink /J`)**: Antigravity's Go Language Server discovers plugins via `filepath.Walk`, which treats Windows directory junctions as reparse points and skips them without following, causing plugins to disappear from discovery.
+- **Direct Copy Required**: On Windows, always copy the directory contents directly (`shutil.copytree`) instead of creating an NTFS junction.
 
 ---
 

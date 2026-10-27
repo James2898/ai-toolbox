@@ -240,14 +240,12 @@ def link_local(src_dir: Path, target_dir: Path) -> bool:
             else:
                 shutil.rmtree(target_dir)
 
-    # 1. On Windows: Try directory junction (mklink /J)
+    # 1. On Windows: Antigravity's Go Language Server uses filepath.Walk, which skips
+    # directory junctions / reparse points. Direct copy guarantees discovery.
     if sys.platform == "win32":
-        import subprocess
-        cmd = ["cmd", "/c", "mklink", "/J", str(target_dir), str(src_dir)]
-        res = subprocess.run(cmd, capture_output=True, text=True)
-        if res.returncode == 0:
-            print(f"Linked via Windows Directory Junction: {target_dir} -> {src_dir}")
-            return True
+        shutil.copytree(src_dir, target_dir)
+        print(f"Synced copy to: {target_dir}")
+        return True
 
     # 2. On macOS/Linux or Windows Developer Mode: Try symlink
     try:

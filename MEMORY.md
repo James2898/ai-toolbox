@@ -18,3 +18,8 @@
 - **RULE-003** | 2026-10-28 | User Preference: `Explicit Approval for Git Branching & Commits`
   - **Context:** Git branch creation and commit operations must always be human-approved.
   - **Rule:** Never create a new git branch or commit changes without explicit user approval. Always propose the branch name, summary of changes, and commit message, and wait for confirmation before executing `git checkout -b`, `git branch`, or `git commit`.
+
+- **RULE-004** | 2026-10-28 | Discovery Issue: `Windows Directory Junctions Skipped by Antigravity Plugin Scanner`
+  - **Context:** When deploying local plugins on Windows to `~/.gemini/config/plugins/<name>`.
+  - **Issue:** Antigravity's Go Language Server walks the plugin directory using `filepath.Walk`, which treats Windows directory junctions / reparse points (`FILE_ATTRIBUTE_REPARSE_POINT`) as symlinks and skips them without following, reporting `Plugins 0` in both `GetAllPlugins` and the Customizations UI.
+  - **Resolution:** On Windows, `tools/build_antigravity.py --link` must copy the folder directly (`shutil.copytree`) instead of creating an NTFS junction.
