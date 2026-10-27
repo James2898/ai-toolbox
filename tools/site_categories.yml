@@ -38,6 +38,7 @@ Code health:
   - code-grill
   - repo-audit
   - code-debt
+  - leak-check
 
 Git:
   - git-branch-create

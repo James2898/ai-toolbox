@@ -51,7 +51,11 @@ claude plugin install ai-toolbox@ai-toolbox
 **Antigravity**
 
 ```bash
-agy plugin install https://github.com/James2898/ai-toolbox
+# Build and link directly into Antigravity (auto-detects OS for Junction / Symlink):
+# On Linux/macOS:
+python3 tools/build_antigravity.py --link
+# On Windows:
+py -3 tools/build_antigravity.py --link
 ```
 
 Or copy (or symlink) `antigravity/ai-toolbox` into `~/.gemini/config/plugins/ai-toolbox`, then restart Antigravity.

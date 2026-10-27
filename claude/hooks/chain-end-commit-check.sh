@@ -73,6 +73,15 @@ unstaged_paths=$(
 
 [ -z "$unstaged_paths" ] && exit 0
 
+# Check repository visibility
+is_public=false
+if command -v gh >/dev/null 2>&1; then
+  gh_out=$(gh repo view --json isPrivate 2>/dev/null || true)
+  if echo "$gh_out" | grep -q '"isPrivate":false'; then
+    is_public=true
+  fi
+fi
+
 # Match against our list of "should-have-been-committed" patterns.
 matched=()
 
@@ -94,7 +103,11 @@ while IFS= read -r path; do
       matched+=("CHANGELOG.md")
       ;;
     MEMORY.md)
-      matched+=("MEMORY.md")
+      if [ "$is_public" = "true" ]; then
+        echo "⚠ PUBLIC REPO HYGIENE ALERT: Repository is public. Do NOT commit MEMORY.md! Ensure MEMORY.md is in .gitignore." >&2
+      else
+        matched+=("MEMORY.md")
+      fi
       ;;
     tasks/TASK-*.md)
       matched+=("$clean")
@@ -104,6 +117,24 @@ while IFS= read -r path; do
       ;;
   esac
 done <<< "$unstaged_paths"
+
+# Check staged leaks if tools/leak_check.py exists
+leak_script="$repo/tools/leak_check.py"
+if [ -f "$leak_script" ]; then
+  py_cmd=""
+  if command -v python3 >/dev/null 2>&1; then
+    py_cmd="python3"
+  elif command -v py >/dev/null 2>&1; then
+    py_cmd="py -3"
+  fi
+  if [ -n "$py_cmd" ]; then
+    leak_out=$($py_cmd "$leak_script" --staged 2>&1 || true)
+    if echo "$leak_out" | grep -q "finding(s)"; then
+      echo "⚠ LEAK CHECK WARNING: Staged files contain potential credentials/leaks:" >&2
+      echo "$leak_out" | grep -E "finding:|findings" >&2
+    fi
+  fi
+fi
 
 [ "${#matched[@]}" -eq 0 ] && exit 0
 
@@ -136,7 +167,9 @@ recent_task=$(
   echo "on the same feature branch BEFORE pushing/opening the PR:"
   echo ""
   echo "  git add$(for m in "${matched[@]}"; do printf ' %q' "$m"; done)"
-  echo "  git commit -m \"docs($recent_task): trailing chain edits — CHANGELOG, MEMORY, AC amendments\""
+  mem_note=""
+  [ "$is_public" != "true" ] && mem_note=", MEMORY"
+  echo "  git commit -m \"docs($recent_task): trailing chain edits — CHANGELOG${mem_note}, AC amendments\""
   echo ""
   echo "Observed failures: TASK-016, TASK-017, TASK-018, TASK-019 — four"
   echo "consecutive tasks where trailing-agent edits were left uncommitted."

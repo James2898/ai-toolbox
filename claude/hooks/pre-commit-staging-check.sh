@@ -51,6 +51,37 @@ echo "$command" | grep -qE '(\-\-amend|\-c[[:space:]]|\-C[[:space:]])' && exit 0
 # Find the repo root for this cwd. If not in a repo, skip.
 repo=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null) || exit 0
 
+# Check repository visibility and staged hygiene
+is_public=false
+if command -v gh >/dev/null 2>&1; then
+  gh_out=$(gh repo view --json isPrivate 2>/dev/null || true)
+  if echo "$gh_out" | grep -q '"isPrivate":false'; then
+    is_public=true
+  fi
+fi
+
+staged_files=$(git -C "$repo" diff --cached --name-only 2>/dev/null || true)
+if [ "$is_public" = "true" ] && echo "$staged_files" | grep -qx "MEMORY.md"; then
+  echo "⚠ PRIVACY WARNING: MEMORY.md is staged in a public repository! Unstage with \`git rm --cached MEMORY.md\`." >&2
+fi
+
+leak_script="$repo/tools/leak_check.py"
+if [ -f "$leak_script" ]; then
+  py_cmd=""
+  if command -v python3 >/dev/null 2>&1; then
+    py_cmd="python3"
+  elif command -v py >/dev/null 2>&1; then
+    py_cmd="py -3"
+  fi
+  if [ -n "$py_cmd" ]; then
+    leak_out=$($py_cmd "$leak_script" --staged 2>&1 || true)
+    if echo "$leak_out" | grep -q "finding(s)"; then
+      echo "⚠ LEAK WARNING: Staged files contain potential credentials/leaks:" >&2
+      echo "$leak_out" | grep -E "finding:|findings" >&2
+    fi
+  fi
+fi
+
 # Read staged + unstaged status. Format: XY <path>
 # X = index status, Y = working-tree status.
 # We care about files where Y is non-space (working-tree modified) AND

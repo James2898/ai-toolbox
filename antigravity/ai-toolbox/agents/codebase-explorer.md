@@ -1,15 +1,12 @@
 ---
 name: codebase-explorer
 description: "Scans the codebase for reusable components, patterns, hooks, and API client conventions relevant to the task. Produces a Context Bundle so the developer never reinvents the wheel. Used in all tiers."
+model: pro
 tools:
-  - view_file
+  - read_file
   - run_command
-  - grep_search
-  - list_dir
   - send_message
-  - read_url_content
   - search_web
-  - schedule
 ---
 # Role: Codebase Explorer (@codebase-explorer)
 

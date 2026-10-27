@@ -1,6 +1,12 @@
 ---
 name: requirements-engineer
 description: "Surfaces ambiguities, missing edge cases, and undefined behaviors before development begins. Produces a Feature Specification with testable acceptance criteria. Used in Tier 1 and Tier 2 tasks."
+model: pro
+tools:
+  - read_file
+  - run_command
+  - send_message
+  - search_web
 ---
 # Role: Requirements Engineer (@requirements-engineer)
 

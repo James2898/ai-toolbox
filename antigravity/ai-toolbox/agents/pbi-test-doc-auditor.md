@@ -1,16 +1,13 @@
 ---
 name: pbi-test-doc-auditor
 description: "Compares a PBI document against an existing test case document and produces a structured gap analysis — missing AC coverage, weak assertions, and redundant test cases"
+model: pro
 tools:
-  - view_file
-  - write_to_file
-  - replace_file_content
+  - read_file
+  - write_file
+  - edit_file
   - run_command
-  - grep_search
-  - list_dir
   - send_message
-  - read_url_content
-  - search_web
   - schedule
 ---
 # PBI Test Doc Auditor Agent
@@ -30,7 +27,7 @@ Passed in the prompt:
 
 ### Step 1: Load the PBI Document
 
-**For PDF or Markdown**: Read the file directly using the `view_file` tool.
+**For PDF or Markdown**: Read the file directly using the `read_file` tool.
 
 **For directory**: Use `Glob` to find `{pbi_path}/requirements.md` and read it. Also read `{pbi_path}/design.md` if it exists.
 
@@ -50,7 +47,7 @@ For each AC, record:
 
 ### Step 3: Load the Test Document
 
-**For PDF or Markdown**: Read the file directly using the `view_file` tool.
+**For PDF or Markdown**: Read the file directly using the `read_file` tool.
 
 **For directory**: Use `Glob` to find `{testcase_path}/requirements.md` or any `.md` file and read it.
 

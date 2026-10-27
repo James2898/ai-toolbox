@@ -5,6 +5,7 @@ claude/ is the only folder you edit. This script regenerates antigravity/ai-tool
 
     python3 -I tools/build_antigravity.py           # rebuild antigravity/ai-toolbox
     python3 -I tools/build_antigravity.py --check   # exit 1 if the committed output is stale
+    python3 -I tools/build_antigravity.py --link    # rebuild and OS-agnostically link to ~/.gemini/config/plugins/ai-toolbox
 
 Format follows Antigravity's bundled docs (plugin and agy-customizations skills):
 plugin.json keys, skills/<name>/SKILL.md with name + description, agents/<name>.md,
@@ -13,6 +14,7 @@ hooks.json uses a different event model, so the Claude hooks stay Claude-only.
 """
 import filecmp
 import json
+import os
 import re
 import shutil
 import sys
@@ -27,6 +29,7 @@ AGY_PATH = f"~/.gemini/config/plugins/{PLUGIN}"
 
 SKIP_PARTS = {"evals", "__pycache__"}
 MANIFEST_KEYS = {"name", "displayName", "description", "version", "suggestedPrompts", "logo", "disabled"}
+
 WRITE_AGENTS = {
     "fullstack-developer",
     "task-logger",
@@ -40,46 +43,61 @@ SEARCH_AGENTS = {
     "codebase-explorer",
     "validator-agent",
     "integration-contract",
+    "requirements-engineer",
 }
+PROMPT_AGENTS = {
+    "prompt-engineer",
+}
+
 WRITE_TOOLS = [
-    "view_file",
-    "write_to_file",
-    "replace_file_content",
+    "read_file",
+    "write_file",
+    "edit_file",
     "run_command",
-    "grep_search",
-    "list_dir",
     "send_message",
-    "read_url_content",
-    "search_web",
     "schedule",
 ]
 SEARCH_TOOLS = [
-    "view_file",
+    "read_file",
     "run_command",
-    "grep_search",
-    "list_dir",
     "send_message",
-    "read_url_content",
     "search_web",
-    "schedule",
+]
+PROMPT_TOOLS = [
+    "ask_question",
+    "send_message",
 ]
 
-TOOL_MAP = {"Read": "view_file", "Write": "write_to_file", "Edit": "replace_file_content",
-            "MultiEdit": "replace_file_content", "Bash": "run_command", "Grep": "grep_search",
-            "Glob": "list_dir"}
+MODEL_MAP = {
+    "sonnet": "pro",
+    "haiku": "flash",
+    "opus": "pro",
+}
+
+TOOL_MAP = {
+    "Read": "read_file",
+    "Write": "write_file",
+    "Edit": "edit_file",
+    "MultiEdit": "edit_file",
+    "Bash": "run_command",
+    "Grep": "run_command",
+    "Glob": "run_command",
+}
 TOOLS = "|".join(TOOL_MAP)
+
 SUBS = [
     (re.compile(r"AskUserQuestion"), "ask_question"),
     (re.compile(r"\$ARGUMENTS"), "ARGS"),
     (re.compile(r"\$\{CLAUDE_PLUGIN_ROOT\}"), AGY_PATH),
     (re.compile(rf"`({TOOLS})`(?= tool| calls?|\b)"), lambda m: f"`{TOOL_MAP[m.group(1)]}`"),
     (re.compile(rf"\b(?:the )?({TOOLS}) tool\b"), lambda m: f"the `{TOOL_MAP[m.group(1)]}` tool"),
+    (re.compile(r"Agent\(subagent_type:\s*[\"']([^\"']+)[\"']\)"), r"invoke_subagent(TypeName: '\1')"),
 ]
 NOTES = [
     (r"AskUserQuestion", "`ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion)."),
     (r"\$ARGUMENTS", "`ARGS` means whatever the user typed after `/<this-skill>`, or the request that triggered it."),
     (r"Agent\(|subagent_type|`Agent` tool|Agent tool",
-     "Where this says `Agent(subagent_type: \"x\")`, delegate to the subagent `x` in this plugin's `agents/` folder with the same prompt."),
+     "Where this says `Agent(subagent_type: \"x\")`, delegate via `invoke_subagent` to the subagent `x` with the same prompt."),
     (r"mcp__", "Names starting with `mcp__` are Claude Code MCP tool names; use the same server's tool as configured in Antigravity's mcp_config.json."),
     (r"~/\.claude/", "Paths under `~/.claude/` belong to Claude Code and may not exist here; skip steps that only use them and say so."),
 ]
@@ -90,7 +108,7 @@ def split_frontmatter(text):
     if not m:
         return {}, text
     fields = {}
-    for key in ("name", "description"):
+    for key in ("name", "description", "model"):
         mm = re.search(rf"^{key}:\s*(.*)$", m.group(1), re.M)
         if mm:
             v = mm.group(1).strip()
@@ -121,10 +139,17 @@ def render(fields, body, original, kind):
     desc = desc.replace("\\", "\\\\").replace('"', '\\"')
     extra = ""
     if kind == "subagent":
+        agy_model = MODEL_MAP.get(fields.get("model", "").lower(), "inherit")
+        model_line = f"model: {agy_model}\n"
         if fields["name"] in WRITE_AGENTS:
-            extra = "tools:\n" + "".join(f"  - {t}\n" for t in WRITE_TOOLS)
+            tools_block = "tools:\n" + "".join(f"  - {t}\n" for t in WRITE_TOOLS)
         elif fields["name"] in SEARCH_AGENTS:
-            extra = "tools:\n" + "".join(f"  - {t}\n" for t in SEARCH_TOOLS)
+            tools_block = "tools:\n" + "".join(f"  - {t}\n" for t in SEARCH_TOOLS)
+        elif fields["name"] in PROMPT_AGENTS:
+            tools_block = "tools:\n" + "".join(f"  - {t}\n" for t in PROMPT_TOOLS)
+        else:
+            tools_block = ""
+        extra = f"{model_line}{tools_block}"
     out = f"---\nname: {fields['name']}\ndescription: \"{desc}\"\n{extra}---\n"
     if notes:
         out += (f"\n> **Running in Antigravity**: this {kind} is generated from the Claude Code source.\n"
@@ -197,6 +222,45 @@ def same_tree(a, b):
     return all(same_tree(a / d, b / d) for d in cmp.common_dirs)
 
 
+def link_local(src_dir: Path, target_dir: Path) -> bool:
+    """OS-agnostic link or sync into Antigravity's plugin config dir."""
+    target_dir.parent.mkdir(parents=True, exist_ok=True)
+    if target_dir.exists() or target_dir.is_symlink():
+        if sys.platform == "win32":
+            try:
+                import subprocess
+                res = subprocess.run(["cmd", "/c", "rmdir", str(target_dir)], capture_output=True)
+                if res.returncode != 0:
+                    shutil.rmtree(target_dir)
+            except Exception:
+                shutil.rmtree(target_dir, ignore_errors=True)
+        else:
+            if target_dir.is_symlink():
+                target_dir.unlink()
+            else:
+                shutil.rmtree(target_dir)
+
+    # 1. On Windows: Antigravity's Go Language Server uses filepath.Walk, which skips
+    # directory junctions / reparse points. Direct copy guarantees discovery.
+    if sys.platform == "win32":
+        shutil.copytree(src_dir, target_dir)
+        print(f"Synced copy to: {target_dir}")
+        return True
+
+    # 2. On macOS/Linux or Windows Developer Mode: Try symlink
+    try:
+        target_dir.symlink_to(src_dir, target_is_directory=True)
+        print(f"Linked via Symlink: {target_dir} -> {src_dir}")
+        return True
+    except Exception:
+        pass
+
+    # 3. Fallback: Copy
+    shutil.copytree(src_dir, target_dir)
+    print(f"Copied {src_dir} -> {target_dir}")
+    return True
+
+
 def main(argv):
     if "--check" in argv:
         with tempfile.TemporaryDirectory() as tmp:
@@ -207,8 +271,14 @@ def main(argv):
                 return 1
         print("antigravity/ is up to date")
         return 0
+
     counts = build(OUT)
     print(f"built {OUT.relative_to(ROOT)}: {counts['skills']} skills, {counts['agents']} agents, {counts['rules']} rule files")
+
+    if "--link" in argv:
+        target = Path.home() / ".gemini" / "config" / "plugins" / PLUGIN
+        link_local(OUT, target)
+
     return 0
 
 
