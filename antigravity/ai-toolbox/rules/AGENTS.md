@@ -94,12 +94,16 @@ If the tech stack for a given layer is still TBD, do not assume a framework or l
 ---
 
 ## Headless Shells, Interactive Commands & Token Loop Guard
-
-In automated background or subagent execution shells:
-1. **No Interactive Auth Commands**: Never execute commands that prompt for interactive credentials (e.g. `git push`, `gh auth login`, `ssh` without key) unless pre-authenticated credentials or tokens are explicitly verified in the environment.
-2. **Immediate Task Cancellation on Wait**: If a background command stalls or waits on credentials (e.g. Git Credential Manager), do **not** enter a polling loop (`manage_task status` or sleep loops). Immediately terminate the stalled task and hand the exact command over to the user to run in their interactive terminal.
-3. **Token Multiplication Prevention**: In sessions with large active context windows (100k+ tokens), repetitive polling or retry loops re-read the entire context on every turn, rapidly burning millions of tokens in minutes. Avoid repeated status checks on stalled processes.
-4. **CLI Path Resolution on Windows**: When CLI tools like `gh` are not found on the default session `$env:PATH`, inspect standard locations (such as `C:\Program Files\GitHub CLI\gh.exe`) before assuming they are uninstalled.
+- **No Interactive Auth or Terminal Input Commands**: Never execute commands that prompt for interactive credentials (e.g., `git push`, `gh auth login`, `ssh` without key) unless credentials/tokens are pre-verified. Always prefer non-interactive flags (e.g., `CI=true`, `PIP_NO_INPUT=1`, `npm --yes`).
+- **Reactive Wakeup Over Active Polling (Long-Running Tasks)**:
+  - For naturally slow commands (e.g., package installation, build, test suites), use higher synchronous wait limits or let the task run in the background and rely on the platform's **reactive completion notification**. Do **not** actively poll `manage_task` or read terminal buffers in a loop.
+- **Strict Stalling & Retry Cap (Max 1 Retry)**:
+  - If a background command stalls waiting for interactive input, hangs unexpectedly, or fails on missing credentials:
+    1. Check status / retry at most **once**.
+    2. If still unresolvable or blocked on credentials/input, **immediately terminate the task**.
+    3. Surface the exact command to the user to execute directly in their interactive terminal.
+- **Token Loop Prevention**: In sessions with large active context windows (100k+ tokens), repetitive polling loops re-read the entire context on every turn, rapidly burning millions of tokens in minutes.
+- **Windows CLI Tool Paths**: When tools like `gh` are not found on the default session `$env:PATH`, inspect standard locations (e.g., `C:\Program Files\GitHub CLI\gh.exe`) before assuming they are missing.
 
 ---
 
