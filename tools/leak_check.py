@@ -29,14 +29,46 @@ SKIP_FILES = {Path("tools/leak_check.py")}
 
 GENERIC = [
     ("private key", r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
-    ("GitHub token", r"\bgh[pousr]_[A-Za-z0-9]{20,}"),
+    ("GitHub token", r"\b(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{50,})\b"),
+    ("Claude API key", r"\bsk-ant-(api[0-9]{2}-)?[A-Za-z0-9_-]{20,}\b"),
+    ("Google / Gemini API key", r"\bAIza[0-9A-Za-z-_]{35}\b"),
     ("AWS key", r"\bAKIA[0-9A-Z]{16}\b"),
     ("Slack token", r"\bxox[abprs]-[A-Za-z0-9-]{10,}"),
     ("API key assignment", r"(?i)\b(api[_-]?key|secret|token|passw(or)?d)\s*[:=]\s*['\"][^'\"\s]{12,}['\"]"),
     ("email address", r"\b[A-Za-z0-9._%+-]+@(?!example\.(com|org|test)\b)[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
-    ("absolute home path", r"/(Users|home)/[A-Za-z0-9._-]+/"),
+    ("absolute home path", r"(/(Users|home)/[A-Za-z0-9._-]+/|[A-Za-z]:\\Users\\[A-Za-z0-9._-]+\\)"),
     ("private IP", r"\b(10\.\d{1,3}|192\.168|172\.(1[6-9]|2\d|3[01]))\.\d{1,3}\.\d{1,3}\b"),
 ]
+
+
+def check_repo_hygiene(staged=False):
+    """Check repository visibility and ensure public repos do not track MEMORY.md."""
+    findings = []
+    is_public = False
+    try:
+        res = subprocess.run(["gh", "repo", "view", "--json", "isPrivate"], capture_output=True, text=True, timeout=5)
+        if res.returncode == 0 and '"isPrivate":false' in res.stdout.replace(" ", ""):
+            is_public = True
+    except Exception:
+        pass
+
+    if is_public:
+        if staged:
+            # Check if MEMORY.md is among staged files (being added/modified)
+            cmd = ["git", "-C", str(ROOT), "diff", "--cached", "--name-only", "--diff-filter=ACM"]
+            out = subprocess.run(cmd, capture_output=True, text=True).stdout.splitlines()
+            if "MEMORY.md" in out:
+                findings.append("MEMORY.md is staged for commit in a public repository! Unstage with `git rm --cached MEMORY.md`.")
+        else:
+            # Check if MEMORY.md is tracked in Git
+            res_tracked = subprocess.run(["git", "-C", str(ROOT), "ls-files", "MEMORY.md"], capture_output=True, text=True)
+            if res_tracked.returncode == 0 and res_tracked.stdout.strip():
+                findings.append("MEMORY.md is tracked in a public repository! Run `git rm --cached MEMORY.md`.")
+            # Check if MEMORY.md is in .gitignore
+            res_ignored = subprocess.run(["git", "-C", str(ROOT), "check-ignore", "-q", "MEMORY.md"], capture_output=True)
+            if res_ignored.returncode != 0:
+                findings.append("MEMORY.md is missing from .gitignore in a public repository! Add `MEMORY.md` to .gitignore.")
+    return findings
 
 
 def load_private():
@@ -87,7 +119,14 @@ def main(argv):
     patterns = [(n, re.compile(p)) for n, p in GENERIC + load_private()]
     allow = load_allow()
     findings = 0
-    for f in files("--staged" in argv):
+    staged = "--staged" in argv
+
+    hygiene_issues = check_repo_hygiene(staged=staged)
+    for issue in hygiene_issues:
+        findings += 1
+        print(f"hygiene finding: {issue}")
+
+    for f in files(staged):
         rel = f.relative_to(ROOT)
         if rel in SKIP_FILES or not f.exists():
             continue

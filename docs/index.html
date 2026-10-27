@@ -353,7 +353,8 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "skills": [
     "code-grill",
     "repo-audit",
-    "code-debt"
+    "code-debt",
+    "leak-check"
    ]
   },
   {
@@ -681,6 +682,23 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "extras": [],
    "path": "claude/skills/irl-explain/SKILL.md",
    "agy_path": "antigravity/ai-toolbox/skills/irl-explain/SKILL.md"
+  },
+  {
+   "name": "leak-check",
+   "description": "Audit the repository and git diff for sensitive data, secrets, platform tokens, and memory leaks before publishing or committing. Verifies repository visibility (public vs private), confirms MEMORY.md and session notes are untracked and gitignored in public repos, scans for API keys (Claude sk-ant-, Gemini AIza, GitHub, AWS, Slack), private keys, emails, and local user paths. Flags findings by file:line without printing secret values. Use whenever the user asks to check for leaks, audit privacy, verify secrets, check memory hygiene, or before publishing/pushing.",
+   "summary": "Audit the repository and git diff for sensitive data, secrets, platform tokens, and memory leaks before publishing or committing.",
+   "user_only": false,
+   "tools": [
+    "Bash",
+    "Read",
+    "Glob",
+    "Grep"
+   ],
+   "writes": false,
+   "uses_agents": false,
+   "extras": [],
+   "path": "claude/skills/leak-check/SKILL.md",
+   "agy_path": "antigravity/ai-toolbox/skills/leak-check/SKILL.md"
   },
   {
    "name": "live-verify",

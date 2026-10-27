@@ -10,3 +10,6 @@ profiles/*.yml
 # skill-creator eval scaffolding and eval prompts (they reference real projects)
 *-workspace/
 claude/skills/*/evals/
+
+# session memories stay private; public toolbox repo must not track local memory
+MEMORY.md

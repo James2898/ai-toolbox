@@ -52,6 +52,7 @@ The rules are what the project wrote down, plus what its sibling code does:
 - Sibling code: for each new or changed function, component, hook or handler, find the closest existing one doing the same job and compare naming, layering, error handling, test style.
 - Lessons: grep `{memory_dir}` for the files, symbols and feature area the diff touches; check the diff against the hits.
 - Smell baseline: dead or unreachable code, duplicated types or helpers that already exist, names that leak the caller's state (`isDrawerOpen` where `showX` is meant), comments that narrate the diff instead of the code, tests that assert their own fixture, scope that drifted beyond the spec.
+- Privacy and leak hygiene: run `/leak-check` (or `python3 -I tools/leak_check.py`) over the diff to verify repository visibility, ensure `MEMORY.md` or scratchpads are never committed in public repos, and block platform tokens (Claude `sk-ant-`, Gemini `AIza`, GitHub PATs) or credentials.
 - Mechanical checks: run `{frontend_check}`, `{backend_test}` and `{format_check}` for the touched areas, plus the suites that depend on changed shapes. Classify any failure against the base (`git stash; run; git stash pop` or a base worktree) before blaming the diff.
 
 ### 4. Spec axis
