@@ -11,6 +11,7 @@ Changes to the ai-toolbox skills, agents, rules, hooks and build tools, newest f
 - Rules: operational guardrails against headless interactive commands, token multiplication loops, and autonomous git operations. ([#11](https://github.com/James2898/ai-toolbox/pull/11))
 
 ### Changed
+- Rules: refined `AGENTS.md` Headless Shells & Token Loop Guard to require non-interactive flags (`CI=true`, `PIP_NO_INPUT=1`, `npm --yes`), prioritize reactive wakeup over active polling loops for long-running commands, and enforce a strict max-1 retry/status-check cap on stalled commands before immediate termination and user escalation. ([#15](https://github.com/James2898/ai-toolbox/pull/15))
 - `self-review`: added privacy and leak hygiene check to Standards axis before opening PRs. ([#11](https://github.com/James2898/ai-toolbox/pull/11))
 - `tools/leak_check.py`: added Claude API key, Gemini API key, and Windows user path patterns, with auto-initialization for private pattern templates. ([#11](https://github.com/James2898/ai-toolbox/pull/11))
 - `tools/build_antigravity.py`: direct directory copy on Windows to ensure Go Language Server plugin scanner discovers all subagents and skills. ([#11](https://github.com/James2898/ai-toolbox/pull/11))

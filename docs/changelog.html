@@ -335,6 +335,42 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
       "items": [
        [
         {
+         "t": "Rules: refined "
+        },
+        {
+         "code": "AGENTS.md"
+        },
+        {
+         "t": " Headless Shells & Token Loop Guard to require non-interactive flags ("
+        },
+        {
+         "code": "CI=true"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "code": "PIP_NO_INPUT=1"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "code": "npm --yes"
+        },
+        {
+         "t": "), prioritize reactive wakeup over active polling loops for long-running commands, and enforce a strict max-1 retry/status-check cap on stalled commands before immediate termination and user escalation. ("
+        },
+        {
+         "t": "#15",
+         "href": "https://github.com/James2898/ai-toolbox/pull/15"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
          "code": "self-review"
         },
         {
