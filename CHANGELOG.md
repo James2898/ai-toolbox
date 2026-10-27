@@ -2,6 +2,22 @@
 
 Changes to the ai-toolbox skills, agents, rules, hooks and build tools, newest first. Only merged work is listed, dated by the day its pull request merged.
 
+## 2026-10-28
+
+### Added
+- `leak-check` skill: audits repository visibility (public vs private), confirms `MEMORY.md` and session notes are untracked and gitignored in public repos, and scans for platform tokens (Claude `sk-ant-`, Gemini `AIza`, GitHub PATs), private keys, emails, and local user paths. ([#11](https://github.com/James2898/ai-toolbox/pull/11))
+- Hooks: `chain-end-commit-check.sh` and `pre-commit-staging-check.sh` enforce public repository memory hygiene and scan staged files for leaks before commits. ([#11](https://github.com/James2898/ai-toolbox/pull/11))
+- Antigravity: model mapping (`sonnet` → `pro`, `haiku` → `flash`, default → `inherit`) and tool guardrail preservation for all 12 subagents. ([#11](https://github.com/James2898/ai-toolbox/pull/11))
+- Rules: operational guardrails against headless interactive commands, token multiplication loops, and autonomous git operations. ([#11](https://github.com/James2898/ai-toolbox/pull/11))
+
+### Changed
+- `self-review`: added privacy and leak hygiene check to Standards axis before opening PRs. ([#11](https://github.com/James2898/ai-toolbox/pull/11))
+- `tools/leak_check.py`: added Claude API key, Gemini API key, and Windows user path patterns, with auto-initialization for private pattern templates. ([#11](https://github.com/James2898/ai-toolbox/pull/11))
+- `tools/build_antigravity.py`: direct directory copy on Windows to ensure Go Language Server plugin scanner discovers all subagents and skills. ([#11](https://github.com/James2898/ai-toolbox/pull/11))
+
+### Removed
+- `MEMORY.md`: untracked from Git and added to `.gitignore` to keep public open-source repository clean. ([#11](https://github.com/James2898/ai-toolbox/pull/11))
+
 ## 2026-10-27
 
 ### Added

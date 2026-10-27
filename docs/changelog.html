@@ -218,6 +218,203 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   ],
   "releases": [
    {
+    "title": "2026-10-28",
+    "groups": [
+     {
+      "kind": "Added",
+      "items": [
+       [
+        {
+         "code": "leak-check"
+        },
+        {
+         "t": " skill: audits repository visibility (public vs private), confirms "
+        },
+        {
+         "code": "MEMORY.md"
+        },
+        {
+         "t": " and session notes are untracked and gitignored in public repos, and scans for platform tokens (Claude "
+        },
+        {
+         "code": "sk-ant-"
+        },
+        {
+         "t": ", Gemini "
+        },
+        {
+         "code": "AIza"
+        },
+        {
+         "t": ", GitHub PATs), private keys, emails, and local user paths. ("
+        },
+        {
+         "t": "#11",
+         "href": "https://github.com/James2898/ai-toolbox/pull/11"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "t": "Hooks: "
+        },
+        {
+         "code": "chain-end-commit-check.sh"
+        },
+        {
+         "t": " and "
+        },
+        {
+         "code": "pre-commit-staging-check.sh"
+        },
+        {
+         "t": " enforce public repository memory hygiene and scan staged files for leaks before commits. ("
+        },
+        {
+         "t": "#11",
+         "href": "https://github.com/James2898/ai-toolbox/pull/11"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "t": "Antigravity: model mapping ("
+        },
+        {
+         "code": "sonnet"
+        },
+        {
+         "t": " → "
+        },
+        {
+         "code": "pro"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "code": "haiku"
+        },
+        {
+         "t": " → "
+        },
+        {
+         "code": "flash"
+        },
+        {
+         "t": ", default → "
+        },
+        {
+         "code": "inherit"
+        },
+        {
+         "t": ") and tool guardrail preservation for all 12 subagents. ("
+        },
+        {
+         "t": "#11",
+         "href": "https://github.com/James2898/ai-toolbox/pull/11"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "t": "Rules: operational guardrails against headless interactive commands, token multiplication loops, and autonomous git operations. ("
+        },
+        {
+         "t": "#11",
+         "href": "https://github.com/James2898/ai-toolbox/pull/11"
+        },
+        {
+         "t": ")"
+        }
+       ]
+      ]
+     },
+     {
+      "kind": "Changed",
+      "items": [
+       [
+        {
+         "code": "self-review"
+        },
+        {
+         "t": ": added privacy and leak hygiene check to Standards axis before opening PRs. ("
+        },
+        {
+         "t": "#11",
+         "href": "https://github.com/James2898/ai-toolbox/pull/11"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "tools/leak_check.py"
+        },
+        {
+         "t": ": added Claude API key, Gemini API key, and Windows user path patterns, with auto-initialization for private pattern templates. ("
+        },
+        {
+         "t": "#11",
+         "href": "https://github.com/James2898/ai-toolbox/pull/11"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "tools/build_antigravity.py"
+        },
+        {
+         "t": ": direct directory copy on Windows to ensure Go Language Server plugin scanner discovers all subagents and skills. ("
+        },
+        {
+         "t": "#11",
+         "href": "https://github.com/James2898/ai-toolbox/pull/11"
+        },
+        {
+         "t": ")"
+        }
+       ]
+      ]
+     },
+     {
+      "kind": "Removed",
+      "items": [
+       [
+        {
+         "code": "MEMORY.md"
+        },
+        {
+         "t": ": untracked from Git and added to "
+        },
+        {
+         "code": ".gitignore"
+        },
+        {
+         "t": " to keep public open-source repository clean. ("
+        },
+        {
+         "t": "#11",
+         "href": "https://github.com/James2898/ai-toolbox/pull/11"
+        },
+        {
+         "t": ")"
+        }
+       ]
+      ]
+     }
+    ]
+   },
+   {
     "title": "2026-10-27",
     "groups": [
      {
