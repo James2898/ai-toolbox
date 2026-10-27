@@ -35,7 +35,7 @@ Status values may come in more than one language or spelling; list every form th
 
 **Some environments block shell commands that name this file type** (for example a data-protection hook that rejects `.csv` in Bash). If yours does — or you don't know yet — follow this:
 
-- **Use the `view_file` tool** for the CSV file. Never `cat`/`head`/`grep` it in Bash — the call is denied and you'll waste a turn.
+- **Use the `read_file` tool** for the CSV file. Never `cat`/`head`/`grep` it in Bash — the call is denied and you'll waste a turn.
 - Don't try to work around such a hook. It's protecting a sheet that contains reporter names.
 
 ## Input — the CSV export, and only the CSV export

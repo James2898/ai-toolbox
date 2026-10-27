@@ -1,16 +1,13 @@
 ---
 name: pbi-test-doc-generator
 description: "Specialist agent that parses a PBI document, audits the codebase against each acceptance criterion, and drafts test scenarios grouped by category"
+model: pro
 tools:
-  - view_file
-  - write_to_file
-  - replace_file_content
+  - read_file
+  - write_file
+  - edit_file
   - run_command
-  - grep_search
-  - list_dir
   - send_message
-  - read_url_content
-  - search_web
   - schedule
 ---
 # PBI Test Doc Generator Agent
@@ -39,7 +36,7 @@ The following are passed in the prompt:
 
 ### Step 1: Load the Document
 
-**For PDF**: Read directly using the `view_file` tool.
+**For PDF**: Read directly using the `read_file` tool.
 
 **For directory**:
 - Read `{input_path}/requirements.md` with `Read` (required)

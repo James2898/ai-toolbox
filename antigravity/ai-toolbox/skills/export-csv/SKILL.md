@@ -101,9 +101,9 @@ RFC 4180, because Sheets' importer follows it:
 - Never pad or truncate rows: every row has exactly the header's column count.
 - Strip markdown that doesn't survive a cell: backticks, `**bold**`, pipe escapes (`\|` → `|`).
 
-## Step 4 — Write with the `write_to_file` tool, not the shell
+## Step 4 — Write with the `write_file` tool, not the shell
 
-Some environments block any shell command whose text names the comma-separated file extension (a guard against data exfiltration, often a pre-tool hook). Write through the file-writing tool regardless, so the skill works either way: no `cat >`, no shell redirection, no `python` with the path on the command line. Build the content in context and write it with the `write_to_file` tool. Verify by `view_file`ing the file back and checking the first rows and the per-row column count — again without Bash.
+Some environments block any shell command whose text names the comma-separated file extension (a guard against data exfiltration, often a pre-tool hook). Write through the file-writing tool regardless, so the skill works either way: no `cat >`, no shell redirection, no `python` with the path on the command line. Build the content in context and write it with the `write_file` tool. Verify by `read_file`ing the file back and checking the first rows and the per-row column count — again without Bash.
 
 ## Step 5 — Report and import instructions
 

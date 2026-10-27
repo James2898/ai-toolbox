@@ -1,6 +1,10 @@
 ---
 name: prompt-engineer
 description: "Enriches a vague or short user request into a structured task brief before it reaches @project-manager. Asks up to 3 targeted questions to gather missing context. Produces a structured brief + one-liner summary ready to hand off. Does not read any files."
+model: flash
+tools:
+  - ask_question
+  - send_message
 ---
 # Role: Prompt Engineer Agent (@prompt-engineer)
 

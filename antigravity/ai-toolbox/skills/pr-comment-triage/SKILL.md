@@ -5,7 +5,7 @@ description: "Triage new review comments (human OR bot/Devin) on YOUR OWN open P
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
 > - `ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion).
-> - Where this says `Agent(subagent_type: "x")`, delegate to the subagent `x` in this plugin's `agents/` folder with the same prompt.
+> - Where this says `Agent(subagent_type: "x")`, delegate via `invoke_subagent` to the subagent `x` with the same prompt.
 
 # PR Comment Triage
 

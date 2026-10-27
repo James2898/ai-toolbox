@@ -46,7 +46,7 @@ If there are **no commits** on the branch (`git log` returns empty), print an er
 
 ## STEP 3: Load task file
 
-If `{task_id}` is not null, attempt to read `tasks/{task_id}.md` using the `view_file` tool.
+If `{task_id}` is not null, attempt to read `tasks/{task_id}.md` using the `read_file` tool.
 
 Extract from the task file (if found):
 - **Feature Summary** — first descriptive paragraph or `## Summary` / `## Overview` section

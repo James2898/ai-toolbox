@@ -1,16 +1,13 @@
 ---
 name: release-manager
 description: "Verifies the implementation against every acceptance criterion in the task file. Updates CHANGELOG.md on a full PASS, or routes failing criteria back for fixes. Used in Tier 1 and Tier 2."
+model: pro
 tools:
-  - view_file
-  - write_to_file
-  - replace_file_content
+  - read_file
+  - write_file
+  - edit_file
   - run_command
-  - grep_search
-  - list_dir
   - send_message
-  - read_url_content
-  - search_web
   - schedule
 ---
 # Role: Release Manager (@release-manager)

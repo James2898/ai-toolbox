@@ -1,16 +1,13 @@
 ---
 name: pbi-test-doc-writer
 description: "Specialist agent that expands approved test scenarios and audit results into a structured test plan .md file matching the team QA document format"
+model: flash
 tools:
-  - view_file
-  - write_to_file
-  - replace_file_content
+  - read_file
+  - write_file
+  - edit_file
   - run_command
-  - grep_search
-  - list_dir
   - send_message
-  - read_url_content
-  - search_web
   - schedule
 ---
 # PBI Test Doc Writer Agent
@@ -193,4 +190,4 @@ Before writing the output file, verify:
 2. **Be specific**: Write `order_total=480.00`, not "CSV has correct values".
 3. **Show arithmetic**: Write `math.Round(31×610/61)=310` so reviewers can verify the formula.
 4. **DEVIATED scenarios**: Write Expected as the spec-compliant behavior. Add a note describing what the current code actually does.
-5. **Output directory**: Write directly to `{output_path}` using the `write_to_file` tool. The calling Skill handles directory creation.
+5. **Output directory**: Write directly to `{output_path}` using the `write_file` tool. The calling Skill handles directory creation.

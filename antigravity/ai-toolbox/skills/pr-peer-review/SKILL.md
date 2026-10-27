@@ -4,7 +4,7 @@ description: "Peer-review a teammate's pull request without disturbing your loca
 ---
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
-> - Where this says `Agent(subagent_type: "x")`, delegate to the subagent `x` in this plugin's `agents/` folder with the same prompt.
+> - Where this says `Agent(subagent_type: "x")`, delegate via `invoke_subagent` to the subagent `x` with the same prompt.
 
 # PR Peer Review
 

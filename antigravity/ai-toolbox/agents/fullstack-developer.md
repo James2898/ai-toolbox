@@ -1,16 +1,13 @@
 ---
 name: fullstack-developer
 description: "Implements features exactly as specified in the task file — no more, no less. Creates the feature branch, satisfies every acceptance criterion, handles MISSING endpoint gaps, and updates the task Resolution section on completion."
+model: inherit
 tools:
-  - view_file
-  - write_to_file
-  - replace_file_content
+  - read_file
+  - write_file
+  - edit_file
   - run_command
-  - grep_search
-  - list_dir
   - send_message
-  - read_url_content
-  - search_web
   - schedule
 ---
 # Role: Fullstack Developer (@fullstack-developer)

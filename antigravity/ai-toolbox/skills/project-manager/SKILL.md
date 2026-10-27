@@ -5,7 +5,7 @@ description: "User-only: run only when the user types /project-manager. Route de
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
 > - User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.
-> - Where this says `Agent(subagent_type: "x")`, delegate to the subagent `x` in this plugin's `agents/` folder with the same prompt.
+> - Where this says `Agent(subagent_type: "x")`, delegate via `invoke_subagent` to the subagent `x` with the same prompt.
 
 # Project Manager Skill
 
@@ -45,7 +45,7 @@ Skip only when the user request is explicitly a bug fix, refactor, or change to 
 
 2. **Run a targeted search** using `Bash` — two commands in parallel:
    - `git log --oneline --grep="<feature-keyword>" -i` — finds merged commits/PRs by name (native `--grep` avoids the `| grep` pipeline so the call is auto-approved)
-   - Use the `list_dir` tool (e.g. `**/*<ComponentName>*.tsx`) or `grep_search` tool (with a `glob` filter) to find source files — these are native tools and auto-approved. Avoid `find | xargs grep` chains for this step.
+   - Use the `run_command` tool (e.g. `**/*<ComponentName>*.tsx`) or `run_command` tool (with a `glob` filter) to find source files — these are native tools and auto-approved. Avoid `find | xargs grep` chains for this step.
 
    **Worktree-friendly git rule (applies to ALL read-only git calls in this skill):** when you need to run a git command in a non-cwd directory (e.g. a worktree), use `git -C <path> <verb>` instead of `cd <path> && git <verb>`. The `-C` form is auto-approved; the `cd && git` chain is not.
 
@@ -74,7 +74,7 @@ Either condition alone is sufficient to trigger the already-done report.
 
 ### HARD STOP CHECKLIST addition
 
-The two `run_command` calls in step 2 above are explicitly permitted under the HARD STOP CHECKLIST. They are pre-flight reads, not specialist work. The `replace_file_content` call in step 4 (phase doc ✅ update) is also permitted — it is doc housekeeping, not code.
+The two `run_command` calls in step 2 above are explicitly permitted under the HARD STOP CHECKLIST. They are pre-flight reads, not specialist work. The `edit_file` call in step 4 (phase doc ✅ update) is also permitted — it is doc housekeeping, not code.
 
 ---
 
@@ -110,7 +110,7 @@ The two `run_command` calls in step 2 above are explicitly permitted under the H
 
 > **PARALLELISM CHECKPOINT — read before emitting your first response.** Your first message for a Tier 1 task MUST contain **exactly two `Agent(...)` tool-use blocks side-by-side in the same response** — one for `codebase-explorer`, one for `requirements-engineer`. If your first message contains only ONE `Agent(...)` call, you have already failed this rule. Do not say "launching parallel step" and then emit one call; the words don't run the agents — the tool-use blocks do. Do not wait for the explorer to finish before invoking the requirements-engineer. They have zero shared inputs and must execute concurrently.
 >
-> **Exception:** if the user's request cites specific spec sections/lines (e.g. `spec §5.2 line 767`, `phase-B No.4a`), you MAY issue `view_file` calls FIRST to fetch only those cited ranges and inline them into the handoff prompts. See §4 "Inlining cited spec sections" for the exact protocol. The parallel pair still goes in a single response — just the response AFTER your `view_file` calls return.
+> **Exception:** if the user's request cites specific spec sections/lines (e.g. `spec §5.2 line 767`, `phase-B No.4a`), you MAY issue `read_file` calls FIRST to fetch only those cited ranges and inline them into the handoff prompts. See §4 "Inlining cited spec sections" for the exact protocol. The parallel pair still goes in a single response — just the response AFTER your `read_file` calls return.
 
 1. **(Optional) Inline cited spec sections:** If user request cites spec sections/lines, `Read` them with offset/limit and embed verbatim in both specialists' prompts. Skip if no citations present.
 2. **Explore + Clarify (parallel — two tool-use blocks in ONE response):** Invoke `@codebase-explorer` (Context Finder) and `@requirements-engineer` (Gatekeeper) **simultaneously in a single message** — they have no dependency on each other's output. Pass both the same Handoff Trio (plus inlined cited sections from step 1, if any).
@@ -123,11 +123,11 @@ The two `run_command` calls in step 2 above are explicitly permitted under the H
 
 > **PARALLELISM CHECKPOINT — read before emitting your first response.** Your first message for a Tier 2 task MUST contain **exactly two `Agent(...)` tool-use blocks side-by-side in the same response** — one for `codebase-explorer`, one for `requirements-engineer`. If your first message contains only ONE `Agent(...)` call, you have already failed this rule. Do not say "launching parallel step" and then emit one call; the words don't run the agents — the tool-use blocks do. Do not wait for the explorer to finish before invoking the requirements-engineer. They have zero shared inputs and must execute concurrently.
 >
-> **Exception:** if the user's request cites specific spec sections/lines (e.g. `spec §5.2 line 767`, `phase-B No.4a`), you MAY issue `view_file` calls FIRST to fetch only those cited ranges and inline them into the handoff prompts. See §4 "Inlining cited spec sections" for the exact protocol. The parallel pair still goes in a single response — just the response AFTER your `view_file` calls return.
+> **Exception:** if the user's request cites specific spec sections/lines (e.g. `spec §5.2 line 767`, `phase-B No.4a`), you MAY issue `read_file` calls FIRST to fetch only those cited ranges and inline them into the handoff prompts. See §4 "Inlining cited spec sections" for the exact protocol. The parallel pair still goes in a single response — just the response AFTER your `read_file` calls return.
 
 1. **(Optional) Inline cited spec sections:** If user request cites spec sections/lines, `Read` them with offset/limit and embed verbatim in both specialists' prompts. Skip if no citations present.
 2. **Explore + Clarify (parallel — two tool-use blocks in ONE response):** Invoke `@codebase-explorer` (Context Finder) and `@requirements-engineer` (Gatekeeper) **simultaneously in a single message** — they have no dependency on each other's output. Pass both the same Handoff Trio (plus inlined cited sections from step 1, if any).
-3. **Discover:** Read `docs/api-discovery.md` yourself (via the `view_file` tool) to load the API inventory and backend docs location. Treat that file as the source of truth — do not assume endpoints exist. Pass the relevant endpoint inventory to the contract step below.
+3. **Discover:** Read `docs/api-discovery.md` yourself (via the `read_file` tool) to load the API inventory and backend docs location. Treat that file as the source of truth — do not assume endpoints exist. Pass the relevant endpoint inventory to the contract step below.
 4. **Contract:** Route to `@integration-contract` (Bridge) to lock the FE/BE Technical Schema:
    - For each UI action: map endpoint + HTTP method + request payload + success schema + error schema.
    - Mark each endpoint explicitly as `EXISTS` or `MISSING`.
@@ -283,7 +283,7 @@ For a Tier 2 task your turn looks like this:
    - `Agent({subagent_type: "requirements-engineer", description: "...", prompt: "<Handoff content as plain text>"})`
 
    Both run concurrently. Wait for BOTH to return before proceeding. Do NOT call them in separate messages — they have no dependency, so serial execution wastes wall-clock time and tokens.
-2. (Discover) Use the `view_file` tool to load `docs/api-discovery.md` if it exists. Capture the endpoint inventory for the next step.
+2. (Discover) Use the `read_file` tool to load `docs/api-discovery.md` if it exists. Capture the endpoint inventory for the next step.
 3. Call `Agent({subagent_type: "integration-contract", ...})`. Wait — depends on step 1 + 2 output.
 4. Call `Agent({subagent_type: "task-logger", ...})`. Wait — depends on step 3 output.
 5. **Concurrent-session check, then dev:** First run the concurrent-session detection heuristic (`git worktree list` + `git status --porcelain`; see "Concurrent-session detection" under the Worktree isolation policy). Then call `Agent({subagent_type: "fullstack-developer", ...})` — pass `isolation: "worktree"` IF the heuristic fired, otherwise spawn in the main dir. Wait — depends on the task file.
@@ -395,7 +395,7 @@ Never rely on a prior `git checkout` call having succeeded silently — always r
 
 Before you call ANY tool while orchestrating, ask yourself:
 
-> "Is this one of: (a) an `Agent(...)` call to a downstream specialist, (b) a `view_file` call strictly for the Tier 2 Discover step, (c) a `view_file` call to inline a user-cited spec section into the upcoming Handoff Trio (see §4 'Inlining cited spec sections'), (d) a `run_command` call for the post-worktree verification diff check, (e) a `run_command` call for the branch assert before an inline fix commit, (f) a `run_command` call for the §0 pre-flight already-done check (`git log` + `find`/`wc -l`), (g) an `replace_file_content` call for the §0 phase-doc ✅ housekeeping update, or (h) a `run_command` call for the concurrent-session detection heuristic (`git worktree list` + `git status --porcelain`) run before the dev step?"
+> "Is this one of: (a) an `Agent(...)` call to a downstream specialist, (b) a `read_file` call strictly for the Tier 2 Discover step, (c) a `read_file` call to inline a user-cited spec section into the upcoming Handoff Trio (see §4 'Inlining cited spec sections'), (d) a `run_command` call for the post-worktree verification diff check, (e) a `run_command` call for the branch assert before an inline fix commit, (f) a `run_command` call for the §0 pre-flight already-done check (`git log` + `find`/`wc -l`), (g) an `edit_file` call for the §0 phase-doc ✅ housekeeping update, or (h) a `run_command` call for the concurrent-session detection heuristic (`git worktree list` + `git status --porcelain`) run before the dev step?"
 
 - If **YES** → proceed.
 - If **NO** → STOP. You are about to overstep. Do not use `Write`, `Edit`, `Glob`, `Grep`, or any other tool to do specialist work inline — that work belongs to the developer agent.
@@ -447,7 +447,7 @@ When constructing the `prompt` argument for the next specialist, include these f
 
 3. Then emit the parallel pair as usual. The specialists now have the spec content in-context and will not need to open the file.
 
-**Why this is allowed:** it is a one-time read per citation that prevents N redundant reads downstream (requirements-engineer would otherwise issue 5–10 separate `view_file` calls hunting through the spec, as observed in TASK-014). The PM acts as a citation-resolver, not a specialist.
+**Why this is allowed:** it is a one-time read per citation that prevents N redundant reads downstream (requirements-engineer would otherwise issue 5–10 separate `read_file` calls hunting through the spec, as observed in TASK-014). The PM acts as a citation-resolver, not a specialist.
 
 **Limits — to keep this from becoming a wedge for PM doing real work:**
 - Read ONLY the explicit cited section. Do NOT expand the range "for context."
@@ -458,7 +458,7 @@ When constructing the `prompt` argument for the next specialist, include these f
 ### Handoff Trio Rules
 
 - **Task ID** must reference an existing `tasks/<TASK-ID>.md` if `@task-logger` has already run; otherwise use `pending — task-logger not yet run`. The ID format is `TASK-<YYYYMMDD>-<xxx>` (date + 3-char random suffix, e.g. `TASK-20260608-7f3`) — `@task-logger` mints it to be collision-proof across parallel worktree sessions. Pass it through verbatim; the PM never invents or increments it. The `TASK-NNN` notation elsewhere in this skill is a placeholder for "the assigned ID," not a sequential-number requirement.
-- **Relevant files** must be paths you have VERIFIED exist — either from a prior `view_file` call in this session, or from a recently completed task's `Resolution` section (e.g. `tasks/TASK-013.md` → Files Changed). **Do NOT guess paths based on framework conventions** (e.g. "Next.js usually puts this at `src/app/(teacher)/...`"). If you do not know the actual path, instead of guessing, write `[path TBD — codebase-explorer to resolve]` and include in the Last decision: "Specialist must resolve actual paths from codebase; do not trust placeholder paths."
+- **Relevant files** must be paths you have VERIFIED exist — either from a prior `read_file` call in this session, or from a recently completed task's `Resolution` section (e.g. `tasks/TASK-013.md` → Files Changed). **Do NOT guess paths based on framework conventions** (e.g. "Next.js usually puts this at `src/app/(teacher)/...`"). If you do not know the actual path, instead of guessing, write `[path TBD — codebase-explorer to resolve]` and include in the Last decision: "Specialist must resolve actual paths from codebase; do not trust placeholder paths."
 
   Common failure mode: PM guesses `src/app/(teacher)/classes/new/page.tsx` based on a generic Next.js mental model. The repo actually uses `app/(app)/classes/new/page.tsx` (no `src/`, different route group). Requirements-engineer cannot verify (it's forbidden from reading source) and propagates the wrong path into its handoff. Always defer path resolution to `@codebase-explorer` when in doubt.
 - **Last decision** must capture the single most important constraint or finding from the current step, so the next agent has immediate context without re-reading the full history.

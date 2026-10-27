@@ -5,7 +5,7 @@ description: "Parses a PBI document (PDF or Markdown), audits the codebase again
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
 > - `ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion).
-> - Where this says `Agent(subagent_type: "x")`, delegate to the subagent `x` in this plugin's `agents/` folder with the same prompt.
+> - Where this says `Agent(subagent_type: "x")`, delegate via `invoke_subagent` to the subagent `x` with the same prompt.
 
 # PBI Audit & Test Plan Generator Skill
 
@@ -46,7 +46,7 @@ If no argument is provided, use `ask_question` to ask the user for the path.
 
 ## STEP 2: Input Validation
 
-**For PDF**: Read directly using the `view_file` tool (Claude's native PDF reading — no Python or shell).
+**For PDF**: Read directly using the `read_file` tool (Claude's native PDF reading — no Python or shell).
 
 **For directory**: Search with `Glob`:
 - `{dir}/requirements.md` (required)
@@ -230,6 +230,6 @@ Next steps:
 ## Notes
 
 1. **Output directory**: `{qa_out_dir}/` is relative to the current working directory. Run `mkdir -p` via `Bash` before launching the writer agent.
-2. **PDF reading**: Use Claude's `view_file` tool directly — do not use Python or shell commands.
+2. **PDF reading**: Use Claude's `read_file` tool directly — do not use Python or shell commands.
 3. **Codebase audit**: `pbi-test-doc-generator` runs Glob/Grep relative to the current working directory.
 4. **Output format**: This is a human-readable table for QA reviewers — not a machine-readable automation format; use `/scenario-test --format=importer` or your project's generator for that.

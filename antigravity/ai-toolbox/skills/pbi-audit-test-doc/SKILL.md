@@ -6,7 +6,7 @@ description: "Compares a PBI document against an existing test case document and
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
 > - `ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion).
 > - `ARGS` means whatever the user typed after `/<this-skill>`, or the request that triggered it.
-> - Where this says `Agent(subagent_type: "x")`, delegate to the subagent `x` in this plugin's `agents/` folder with the same prompt.
+> - Where this says `Agent(subagent_type: "x")`, delegate via `invoke_subagent` to the subagent `x` with the same prompt.
 
 # PBI Test Review Skill
 
@@ -50,7 +50,7 @@ If only one path is provided, use `ask_question` to ask for the second:
 
 ## STEP 2: Read Both Documents
 
-Read each file using the `view_file` tool (Claude's native PDF reading — no Python or shell).
+Read each file using the `read_file` tool (Claude's native PDF reading — no Python or shell).
 
 **For directories**: use `Glob` to find `{dir}/requirements.md` (required). Also read `{dir}/design.md` if present.
 
