@@ -41,9 +41,14 @@ GENERIC = [
 
 def load_private():
     if not PRIVATE.exists():
-        print(f"setup error: private pattern file not found: {PRIVATE}\n"
-              "Create it (one regex per line) or set AI_TOOLBOX_LEAK_PATTERNS.", file=sys.stderr)
-        sys.exit(2)
+        try:
+            PRIVATE.parent.mkdir(parents=True, exist_ok=True)
+            PRIVATE.write_text("# Private leak patterns (one regex per line)\n", encoding="utf-8")
+            return []
+        except Exception:
+            print(f"setup error: private pattern file not found: {PRIVATE}\n"
+                  "Create it (one regex per line) or set AI_TOOLBOX_LEAK_PATTERNS.", file=sys.stderr)
+            sys.exit(2)
     pats = []
     for i, line in enumerate(PRIVATE.read_text(encoding="utf-8").splitlines(), 1):
         line = line.strip()
