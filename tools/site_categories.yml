@@ -34,6 +34,11 @@ PR & review:
   - gh-pr-approve
   - gh-pr-merge
 
+Code health:
+  - code-grill
+  - repo-audit
+  - code-debt
+
 Git:
   - git-branch-create
 

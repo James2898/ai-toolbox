@@ -29,7 +29,7 @@ Received from `@task-logger` via the Handoff Trio:
 
 **Primary source of truth:** `tasks/TASK-NNN.md`. Do not rely on conversation history. If the task file is ambiguous, route back to `@project-manager`.
 
-**Tier 0 exception:** For Tier 0 tasks, no `tasks/TASK-NNN.md` and no `context.md` exist — the explorer returns its Context Bundle inline in the Handoff Trio. Implement directly from the inline bundle. Skip steps 1, 2, and 14 (no task file, no artifacts to read, no Resolution section to update), **but STILL execute step 5 (create/switch to `feature/<short-description>` or `fix/<short-description>` off the base branch before editing files) and step 15 (stage and commit the task-scoped files locally)**. Do not wait for or attempt to read `context.md` — it was deliberately not written.
+**Tier 0 exception:** For Tier 0 tasks, no `tasks/TASK-NNN.md` and no `context.md` exist — the explorer returns its Context Bundle inline in the Handoff Trio. Implement directly from the inline bundle. Skip steps 1, 2, and 15 (no task file, no artifacts to read, no Resolution section to update), **but STILL execute step 5 (create/switch to `feature/<short-description>` or `fix/<short-description>` off the base branch before editing files) and step 16 (stage and commit the task-scoped files locally)**. Do not wait for or attempt to read `context.md` — it was deliberately not written.
 
 **Tier 0 MEMORY check (required):** Before implementing, scan the explorer's inline Handoff Trio for a `MEMORY.md Notes` section. If present, treat each listed prevention rule the same way you would treat one inlined in a task file's Implementation Notes — apply it during implementation. If the bundle's MEMORY notes say "N/A" or the section is missing, proceed without MEMORY context. This ensures Tier 0 tasks that happen to touch known-buggy patterns (e.g. Server Actions with a BUG-NNN prevention rule) do not re-introduce fixed bugs.
 
@@ -121,13 +121,15 @@ During implementation:
 8. For Tier 2: implement exactly per the Technical Schema. Do not deviate from endpoint paths, payload shapes, or error handling specified in the contract.
 9. Apply gap-handling for all `MISSING` endpoints: disable the relevant UI control and display the specified hint text.
 10. Do not add new package dependencies without explicit user approval.
-11. Do not implement anything listed under Out of Scope.
-12. Follow all rules in `docs/coding-guidelines.md` (if present) — naming, component size, data integrity, Clean Architecture layering, no silently swallowed errors.
+11. Apply the ladder in the Lean Change Rules (the toolbox rule `lean-change.md`) to every piece you write: reuse the Reuse Candidates from `context.md` first, then the standard library, then installed dependencies, and only then new code. Never cut validation, data-loss error handling, security or accessibility to make a diff smaller.
+    A deliberate shortcut gets a `shortcut: <the limit>, <when to upgrade>` comment. List every shortcut and every unrequested extra you skipped in the Resolution notes (step 15).
+12. Do not implement anything listed under Out of Scope.
+13. Follow all rules in `docs/coding-guidelines.md` (if present) — naming, component size, data integrity, Clean Architecture layering, no silently swallowed errors.
 
 After implementation:
 
-13. Run `npm run format` to format all changed files with Prettier before committing. If `npm run format` is not available, run `npx prettier --write` on each changed file individually.
-14. Update the **Resolution** section of `tasks/TASK-NNN.md` with: completion date, branch name, files changed, a **Diff Summary**, and any notes for the reviewer. **Do this BEFORE `git add`** so the Resolution edit lands in the same commit.
+14. Run `npm run format` to format all changed files with Prettier before committing. If `npm run format` is not available, run `npx prettier --write` on each changed file individually.
+15. Update the **Resolution** section of `tasks/TASK-NNN.md` with: completion date, branch name, files changed, a **Diff Summary**, and any notes for the reviewer. **Do this BEFORE `git add`** so the Resolution edit lands in the same commit.
 
     **Diff Summary (mandatory — consumed by `@release-manager` and `@validator-agent`):** For each changed file, list the touched line ranges and one line on what changed, mapped to the AC it satisfies where applicable. This lets the parallel review/validate agents read targeted ranges instead of cold-reading whole files, which is the single biggest tail-latency cost in the chain. Keep it terse — it is a navigation aid, not a re-statement of the diff. Example:
     ```
@@ -138,13 +140,13 @@ After implementation:
     ```
     Derive the line ranges from `git -C <path> diff <base>...HEAD` — do not hand-estimate them.
 
-15. **Pre-commit checklist (mandatory — observed skipped in TASK-016 and TASK-017):** Before running `git commit`, you MUST do the following in order:
+16. **Pre-commit checklist (mandatory — observed skipped in TASK-016 and TASK-017):** Before running `git commit`, you MUST do the following in order:
 
     a) Run `git status` and read the full output.
 
     b) Stage ALL of the following if they exist and were touched by this task:
        - The implementation files (code changes)
-       - `tasks/TASK-NNN.md` (with Resolution section filled per step 14)
+       - `tasks/TASK-NNN.md` (with Resolution section filled per step 15)
        - `tasks/TASK-NNN/` (the directory containing spec.md, context.md, research.md, schema.md — task-logger moved them here)
        - `CHANGELOG.md` IF you edited it (Tier 0 / Tier 1 typically don't; release-manager owns this on Tier 1/2 — leave alone unless explicitly tasked)
 
@@ -182,7 +184,7 @@ Additionally, update `tasks/TASK-NNN.md` Resolution section:
 - **Base branch:** [develop / main / as specified]
 - **Files changed:**
   - `path/to/file` — [what was added/changed]
-- **Diff Summary:** (per-file line ranges → AC, derived from `git diff <base>...HEAD` — see step 14)
+- **Diff Summary:** (per-file line ranges → AC, derived from `git diff <base>...HEAD` — see step 15)
   - `path/to/file` L40–88 — [what changed] (AC-N)
 - **Notes:** [anything the reviewer should know — deviations, edge cases handled, assumptions made]
 ```

@@ -54,6 +54,8 @@ docs:
   loop_dir: .ai-toolbox/loops      # where /diagnose saves reproduction loops (pr-details reads them as evidence)
   handoff_dir: .ai-toolbox/handoffs   # where /handoff writes and --resume reads handoff files
   research_dir: .ai-toolbox/research # where /research saves cited notes
+  audit_dir: .ai-toolbox/audits      # where /repo-audit --save writes reports
+  debt_file: .ai-toolbox/code-debt.md  # where /code-debt --save writes the ledger
 
 api:
   client_layer: ""                 # where the frontend's request functions live
@@ -65,8 +67,13 @@ database:
   tenant_routing: ""               # how to find the right schema in a multi-tenant setup
   local_container: ""              # e.g. a docker container name for local queries
 
+code_debt:                         # used by /code-debt (and the audits that call it)
+  risk_paths: []                   # extra path regexes where a debt marker ranks one tier higher, e.g. ["internal/billing/"]
+  markers: []                      # extra marker words your team uses, e.g. ["TBD", "REVISIT"]
+
 bug_tracker:
   source: csv                      # csv export of the tracker
+  ticket_pattern: ""               # regex for a ticket reference in comments, e.g. "PBI-[0-9]+"; empty = "#123" or "ABC-123"
   export_glob: ""                  # where to look for the newest export, e.g. "~/Downloads/bugs*.csv"
   columns:                         # map your sheet's headers to the fields skills use
     id: ""

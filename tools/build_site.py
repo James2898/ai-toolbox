@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Build the catalog site (GitHub Pages) from the Claude Code source in claude/.
 
-docs/ is generated; edit claude/, tools/site_categories.yml or tools/site/ (template.html,
-workflow.json) instead:
+docs/ is generated; edit claude/, CHANGELOG.md, tools/site_categories.yml or tools/site/
+(template.html, changelog.html, workflow.json) instead:
 
-    python3 -I tools/build_site.py           # rebuild docs/index.html
+    python3 -I tools/build_site.py           # rebuild docs/index.html and docs/changelog.html
     python3 -I tools/build_site.py --check   # exit 1 if the committed docs/ is stale
 
-The page repeats only what the repository already publishes: skill and agent frontmatter,
-hook script headers, rule summaries and the keys of profiles/example.yml. The output holds no
+The pages repeat only what the repository already publishes: skill and agent frontmatter,
+hook script headers, rule summaries, the keys of profiles/example.yml and CHANGELOG.md. The output holds no
 commit id or date, so rebuilding an unchanged tree gives the same bytes and --check stays stable.
 """
 import json
@@ -23,6 +23,9 @@ TEMPLATE = ROOT / "tools" / "site" / "template.html"
 CATEGORIES = ROOT / "tools" / "site_categories.yml"
 PROFILE = ROOT / "profiles" / "example.yml"
 WORKFLOW = ROOT / "tools" / "site" / "workflow.json"
+CHANGELOG = ROOT / "CHANGELOG.md"
+CHANGELOG_TEMPLATE = ROOT / "tools" / "site" / "changelog.html"
+CHANGE_KINDS = ("Added", "Changed", "Fixed", "Removed")
 AGY_DIR = "antigravity/ai-toolbox"
 WRITE_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 SKIP_PARTS = {"evals", "__pycache__"}
@@ -229,6 +232,53 @@ def read_workflow(agent_names):
     return wf
 
 
+def inline(text):
+    # Split Markdown into text, `code` and [text](url) runs, so the page builds DOM nodes instead of parsing HTML.
+    out, pos = [], 0
+    for m in re.finditer(r"`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)\)", text):
+        if m.start() > pos:
+            out.append({"t": text[pos:m.start()]})
+        out.append({"code": m.group(1)} if m.group(1) is not None else {"t": m.group(2), "href": m.group(3)})
+        pos = m.end()
+    if pos < len(text):
+        out.append({"t": text[pos:]})
+    return out
+
+
+def read_changelog():
+    intro, releases, release, group = [], [], None, None
+    for raw in CHANGELOG.read_text(encoding="utf-8").splitlines():
+        line = raw.rstrip()
+        head = re.match(r"^## (.+)$", line)
+        kind = re.match(r"^### (.+)$", line)
+        item = re.match(r"^- (.+)$", line)
+        if not line or line.startswith("# "):
+            continue
+        if head:
+            title = head.group(1).strip()
+            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", title):
+                raise BuildError(f"CHANGELOG.md: a release heading is the merge date (YYYY-MM-DD), not {title!r}")
+            release, group = {"title": title, "groups": []}, None
+            releases.append(release)
+        elif kind:
+            if release is None or kind.group(1) not in CHANGE_KINDS:
+                raise BuildError(f"CHANGELOG.md: '### {kind.group(1)}' must sit under a release and be one of {', '.join(CHANGE_KINDS)}")
+            group = {"kind": kind.group(1), "items": []}
+            release["groups"].append(group)
+        elif item and group:
+            group["items"].append(item.group(1))
+        elif line.startswith("  ") and group and group["items"]:
+            group["items"][-1] += " " + line.strip()
+        elif release is None:
+            intro.append(line)
+        else:
+            raise BuildError(f"CHANGELOG.md: cannot read line {raw!r}")
+    for r in releases:
+        for g in r["groups"]:
+            g["items"] = [inline(i) for i in g["items"]]
+    return {"intro": inline(" ".join(intro)), "releases": releases}
+
+
 def build_data():
     plugin = json.loads((SRC / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
     repo = plugin["repository"].rstrip("/")
@@ -281,12 +331,27 @@ def build_data():
     }
 
 
+def as_json(data):
+    return json.dumps(data, ensure_ascii=False, indent=1).replace("</", "<\\/")
+
+
 def render():
-    data = json.dumps(build_data(), ensure_ascii=False, indent=1).replace("</", "<\\/")
+    data = build_data()
     template = TEMPLATE.read_text(encoding="utf-8")
     if template.count("/*DATA*/") != 1:
         raise BuildError("template.html must contain /*DATA*/ exactly once")
-    return {"index.html": template.replace("/*DATA*/", data), ".nojekyll": ""}
+    # The changelog page reuses the catalog's stylesheet, so the two pages cannot drift apart.
+    style = re.search(r"<style>\n(.*?)</style>", template, re.S)
+    page = CHANGELOG_TEMPLATE.read_text(encoding="utf-8")
+    if not style or page.count("/*STYLE*/") != 1 or page.count("/*DATA*/") != 1:
+        raise BuildError("changelog.html must contain /*STYLE*/ and /*DATA*/ once, and template.html one <style> block")
+    log = {k: data[k] for k in ("version", "repo", "license")}
+    log["changelog"] = read_changelog()
+    return {
+        "index.html": template.replace("/*DATA*/", as_json(data)),
+        "changelog.html": page.replace("/*STYLE*/", style.group(1).rstrip()).replace("/*DATA*/", as_json(log)),
+        ".nojekyll": "",
+    }
 
 
 def main(argv):
@@ -306,7 +371,7 @@ def main(argv):
     OUT.mkdir(exist_ok=True)
     for name, content in files.items():
         (OUT / name).write_text(content, encoding="utf-8")
-    print(f"wrote {OUT.relative_to(ROOT)}/index.html")
+    print(f"wrote {OUT.relative_to(ROOT)}/index.html and changelog.html")
     return 0
 
 

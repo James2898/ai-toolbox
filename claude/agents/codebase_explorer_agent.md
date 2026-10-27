@@ -31,7 +31,7 @@ Received from `@project-manager` via the Handoff Trio:
    - Existing form state management patterns (e.g., react-hook-form, Formik, native forms, or backend form handling)
    - Existing backend handler/service/repository patterns for similar domain operations
 5. Identify:
-   - **Reuse candidates:** Files/functions that should be used directly or extended
+   - **Reuse candidates:** Files/functions that should be used directly or extended. Also note when the standard library, the platform or an already-installed dependency covers part of the task, so nothing gets written or added that already exists (the ladder in the toolbox rule `lean-change.md`).
    - **Patterns to follow:** How similar features are structured in this codebase
    - **Anti-patterns to avoid:** Existing code that violates guidelines (flag, do not fix)
 6. Do not modify any files. Read only.
