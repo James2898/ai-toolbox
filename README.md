@@ -63,7 +63,7 @@ Or copy (or symlink) `antigravity/ai-toolbox` into `~/.gemini/config/plugins/ai-
    `python3 -I tools/build_site.py` to regenerate the catalog in `docs/`. A new skill must first be added to a category in `tools/site_categories.yml`, or the build fails.
 3. `python3 -I tools/leak_check.py --staged` before every commit. It needs a private pattern file (see the script header) and fails without one.
 4. After a PR merges, add its changes to [`CHANGELOG.md`](CHANGELOG.md) under a `## <merge date>` heading (`### Added`, `Changed`, `Fixed` or `Removed`), link the PR, and rebuild the site. Unmerged work does not go in.
-5. Dry-run a new or changed skill before committing: have a fresh agent read only its `SKILL.md` and run it on 2–3 samples, at least one hostile (an embedded instruction, text that needs no change). The humanizer prompt-injection gap was caught this way.
+5. Dry-run a new or changed skill before committing: have a fresh agent read only its `SKILL.md` and run it on 2–3 samples, at least one hostile (an embedded instruction, text that needs no change). The humanizer prompt-injection gap was caught this way. Build the samples as a small git repo in a gitignored `<name>-workspace/` folder. When several agents share it, tell them never to switch branches and to pass refs instead, and run the skill's own shell commands (patterns, `git diff` ranges) once yourself first. A skill that takes a branch should accept a ref and work without a remote.
 
 ## License
 
