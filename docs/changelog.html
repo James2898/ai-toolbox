@@ -218,6 +218,241 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   ],
   "releases": [
    {
+    "title": "2026-10-27",
+    "groups": [
+     {
+      "kind": "Added",
+      "items": [
+       [
+        {
+         "code": "lean-change"
+        },
+        {
+         "t": " rule: an always-on ladder for code changes (does it need to exist → already in the codebase → standard library → installed dependency → one line → minimum code), a never-cut list (validation, data-loss handling, security, accessibility, anything asked for) and the "
+        },
+        {
+         "code": "shortcut: <limit>, <when to upgrade>"
+        },
+        {
+         "t": " comment. Adapted from "
+        },
+        {
+         "t": "ponytail",
+         "href": "https://github.com/DietrichGebert/ponytail"
+        },
+        {
+         "t": " v5.3.2 (MIT). ("
+        },
+        {
+         "t": "#9",
+         "href": "https://github.com/James2898/ai-toolbox/pull/9"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "code-grill"
+        },
+        {
+         "t": " skill: grills an implementation approach round by round before coding, in ladder order, and closes with a decision record and the smallest plan. "
+        },
+        {
+         "code": "--diff"
+        },
+        {
+         "t": " grills the branch afterwards for plan drift and new debt markers. ("
+        },
+        {
+         "t": "#9",
+         "href": "https://github.com/James2898/ai-toolbox/pull/9"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "repo-audit"
+        },
+        {
+         "t": " skill: read-only audit of a whole repository or package, ranked as Must fix / Should fix / Nice to have, each finding with a triggering case and a re-read "
+        },
+        {
+         "code": "file:line"
+        },
+        {
+         "t": ". Secrets are reported by location and type, never by value. ("
+        },
+        {
+         "t": "#9",
+         "href": "https://github.com/James2898/ai-toolbox/pull/9"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "code-debt"
+        },
+        {
+         "t": " skill: ranked ledger of FIXME, HACK, TODO, "
+        },
+        {
+         "code": "shortcut:"
+        },
+        {
+         "t": " and other markers in code comments, bumped for risk paths and untracked work. "
+        },
+        {
+         "code": "--diff"
+        },
+        {
+         "t": " lists only what a branch adds; "
+        },
+        {
+         "code": "--ref"
+        },
+        {
+         "t": " scans a branch without checking it out. ("
+        },
+        {
+         "t": "#9",
+         "href": "https://github.com/James2898/ai-toolbox/pull/9"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "t": "Catalog: a **Code health** category, and this changelog page, generated from "
+        },
+        {
+         "code": "CHANGELOG.md"
+        },
+        {
+         "t": " and linked from the catalog header. ("
+        },
+        {
+         "t": "#9",
+         "href": "https://github.com/James2898/ai-toolbox/pull/9"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "t": "Profile keys: "
+        },
+        {
+         "code": "docs.audit_dir"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "code": "docs.debt_file"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "code": "code_debt.risk_paths"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "code": "code_debt.markers"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "code": "bug_tracker.ticket_pattern"
+        },
+        {
+         "t": ". ("
+        },
+        {
+         "t": "#9",
+         "href": "https://github.com/James2898/ai-toolbox/pull/9"
+        },
+        {
+         "t": ")"
+        }
+       ]
+      ]
+     },
+     {
+      "kind": "Changed",
+      "items": [
+       [
+        {
+         "code": "fullstack-developer"
+        },
+        {
+         "t": " applies the lean-change ladder as its own rule and lists shortcuts and skipped extras in the task Resolution. ("
+        },
+        {
+         "t": "#9",
+         "href": "https://github.com/James2898/ai-toolbox/pull/9"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "validator-agent"
+        },
+        {
+         "t": " audits a fourth dimension, Lean. Lean findings are Warning or Suggestion only, so they never start the fix loop. ("
+        },
+        {
+         "t": "#9",
+         "href": "https://github.com/James2898/ai-toolbox/pull/9"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "codebase-explorer"
+        },
+        {
+         "t": " notes when the standard library, the platform or an installed dependency already covers part of a task. ("
+        },
+        {
+         "t": "#9",
+         "href": "https://github.com/James2898/ai-toolbox/pull/9"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "t": "README: changelog entries are added after a PR merges, and the dry-run step describes a shared fixture repo and ref-based branch handling. ("
+        },
+        {
+         "t": "#9",
+         "href": "https://github.com/James2898/ai-toolbox/pull/9"
+        },
+        {
+         "t": ")"
+        }
+       ]
+      ]
+     }
+    ]
+   },
+   {
     "title": "2026-10-26",
     "groups": [
      {
