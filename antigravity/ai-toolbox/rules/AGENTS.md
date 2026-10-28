@@ -94,6 +94,7 @@ If the tech stack for a given layer is still TBD, do not assume a framework or l
 ---
 
 ## Headless Shells, Interactive Commands & Token Loop Guard
+
 - **No Interactive Auth or Terminal Input Commands**: Never execute commands that prompt for interactive credentials (e.g., `git push`, `gh auth login`, `ssh` without key) unless credentials/tokens are pre-verified. Always prefer non-interactive flags (e.g., `CI=true`, `PIP_NO_INPUT=1`, `npm --yes`).
 - **Reactive Wakeup Over Active Polling (Long-Running Tasks)**:
   - For naturally slow commands (e.g., package installation, build, test suites), use higher synchronous wait limits or let the task run in the background and rely on the platform's **reactive completion notification**. Do **not** actively poll `manage_task` or read terminal buffers in a loop.
