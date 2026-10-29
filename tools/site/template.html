@@ -287,7 +287,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
 
   // Header
   $("name").textContent = D.name;
-  $("version").textContent = "v" + D.version;
+  if (D.version) $("version").textContent = "v" + D.version; else $("version").remove();
   $("tagline").textContent = D.description;
   $("repo-link").href = D.repo;
   $("readme-link").href = D.repo + "#readme";

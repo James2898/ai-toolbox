@@ -48,6 +48,8 @@ claude plugin marketplace add James2898/ai-toolbox
 claude plugin install ai-toolbox@ai-toolbox
 ```
 
+To pick up a merge later, run `claude plugin update ai-toolbox@ai-toolbox`, or turn on auto-update for the `ai-toolbox` marketplace in a session under `/plugin` → Marketplaces (third-party marketplaces have it off by default). The manifest sets no `version`, so every update tracks the latest commit.
+
 **Antigravity**
 
 ```bash
