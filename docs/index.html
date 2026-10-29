@@ -268,7 +268,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
 
 <script type="application/json" id="data">{
  "name": "ai-toolbox",
- "version": "0.1.0",
+ "version": "",
  "description": "Skills, agents, rules and hooks for day-to-day dev work: QA test documents, spec and PBI review, PR and git helpers, bug-fix workflow, live browser verification, explainers and task orchestration. Project details come from a profile, so the tools work on any repository.",
  "license": "MIT",
  "repo": "https://github.com/James2898/ai-toolbox",
@@ -1813,7 +1813,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
 
   // Header
   $("name").textContent = D.name;
-  $("version").textContent = "v" + D.version;
+  if (D.version) $("version").textContent = "v" + D.version; else $("version").remove();
   $("tagline").textContent = D.description;
   $("repo-link").href = D.repo;
   $("readme-link").href = D.repo + "#readme";

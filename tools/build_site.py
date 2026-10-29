@@ -304,7 +304,7 @@ def build_data():
         del s["_body"]
     return {
         "name": plugin["name"],
-        "version": plugin["version"],
+        "version": plugin.get("version", ""),
         "description": plugin["description"],
         "license": plugin.get("license", ""),
         "repo": repo,

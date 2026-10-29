@@ -69,7 +69,7 @@
     return parent;
   }
 
-  $("version").textContent = "v" + D.version;
+  if (D.version) $("version").textContent = "v" + D.version; else $("version").remove();
   $("repo-link").href = D.repo;
   $("source-link").href = D.repo + "/blob/main/CHANGELOG.md";
   $("license").textContent = D.license + " license.";
