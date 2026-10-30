@@ -105,12 +105,13 @@ If the tech stack for a given layer is still TBD, do not assume a framework or l
     3. Surface the exact command to the user to execute directly in their interactive terminal.
 - **Token Loop Prevention**: In sessions with large active context windows (100k+ tokens), repetitive polling loops re-read the entire context on every turn, rapidly burning millions of tokens in minutes.
 - **Windows CLI Tool Paths**: When tools like `gh` are not found on the default session `$env:PATH`, inspect standard locations (e.g., `C:\Program Files\GitHub CLI\gh.exe`) before assuming they are missing.
+- **Windows CRLF & Multiline Edits**: In repositories checked out on Windows with CRLF (`\r\n`) line endings, `edit_file` calls using Unix newlines (`\n`) in multiline targets will fail to match. When editing files with CRLF endings, use a lightweight Python script in `scratch/` that preserves line endings, or inspect line ending format before multiline edits.
 
 ---
 
 ## Git Operations Approval
 
-Never create a new git branch (`git checkout -b`, `git branch`) or commit changes (`git commit`) autonomously without explicit user approval. Always present the proposed branch name, staged diff/changes, and commit message to the user, and wait for confirmation before executing.
+Never create a new git branch (`git checkout -b`, `git branch`) or commit changes (`git commit`) autonomously without explicit user approval. Always present the proposed branch name, staged diff/changes, and commit message to the user, and wait for confirmation before executing. Always prefer `git fetch origin --prune` over fetching single branches (e.g. `git fetch origin main`), ensuring newly created remote tracking branches (such as `develop` or topic branches) are immediately discoverable.
 
 ---
 
