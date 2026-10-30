@@ -84,6 +84,18 @@ When `@release-manager` sends NEEDS CHANGES back to `@fullstack-developer`:
 
 ---
 
+## Live Verification Gating & Retry Limit
+
+When `@live-verifier` executes (Tier 1 & Tier 2 after parallel review/validate):
+1. **Applicability Gate:** PM verifies whether the git diff modifies frontend/UI surface and `{local_url}` is configured. Non-UI tasks record `SKIPPED: non-UI task` and bypass live verification.
+2. **Missing Environment / MCP:** If `{local_url}` is unreachable or Playwright MCP tools are unavailable, record `SKIPPED: env/mcp offline` and proceed without failing the chain.
+3. **Authentication Wall:** If an unauthenticated session is detected on a login-required page, the chain pauses for the user to log in once in the headed browser window, then resumes.
+4. **Failure & Retry Limit:** When `@live-verifier` reports failure (DOM assertion failure, unexpected 500 error, missing toast), PM routes the failure details to `@fullstack-developer`. If the same failure persists after 2 fix attempts, stop the chain and surface to the user.
+5. **Privacy & No Screenshots:** In all repositories (including public repos), `@live-verifier` must never take or store screenshots on disk. Evidence is recorded as text tables only with zero personal data.
+6. **Post-Orchestration Manual Verification Offer:** After the full orchestration chain completes (including the Learn step), if `@live-verifier` executed and passed, the PM asks the user if they want to run manual verification on the live app. If the user accepts, the PM ensures the dev server is active, presents a prioritized checklist of routes and user flows to verify (P1 core flows, P2 edge/error states, P3 sibling regressions), and pauses until the user confirms completion before finalizing.
+
+---
+
 ## Ambiguous Requests
 
 If a request is ambiguous, route through `@project-manager` → `@requirements-engineer`. Do not guess intent.

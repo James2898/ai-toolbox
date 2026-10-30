@@ -183,6 +183,8 @@ def read_rules():
         for line in path.read_text(encoding="utf-8").splitlines():
             if line.startswith("# ") and title == path.stem:
                 title = line[2:].strip()
+            elif line.strip().startswith("<!--") or line.strip().endswith("-->"):
+                continue
             elif line.strip() and not line.startswith("#"):
                 para.append(re.sub(r"^>\s?", "", line).strip())
             elif para:
