@@ -383,8 +383,9 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    ]
   },
   {
-   "name": "Writing",
+   "name": "Documentation & writing",
    "skills": [
+    "doc-grill",
     "humanizer"
    ]
   }
@@ -560,6 +561,26 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "extras": [],
    "path": "claude/skills/diagnose/SKILL.md",
    "agy_path": "antigravity/ai-toolbox/skills/diagnose/SKILL.md"
+  },
+  {
+   "name": "doc-grill",
+   "description": "Interrogate technical documentation, READMEs, architecture docs, runbooks, API guides, and customization files (skills, agents, rules) adversarially — checking whether the doc tells the truth about the code, answers real failure modes, omits unneeded bloat, and avoids bit rot. Settles facts from the codebase itself (file:line) before asking, evaluates across a 7-family ladder (Truth, Audience, Failure, Verifiability, Lean Docs, Maintenance, and PR Drift), and presents questions with recommended answers that 'yes' accepts. Supports List mode (one ranked table), --rounds (interactive interview over a doc tree), --diff (grill doc changes against code or check if code changes created doc drift), and --audience=<role>. Read-only apart from a confirmed --append. Use whenever the user asks 'grill this doc', 'audit this README', 'is this documentation accurate', 'check this guide for bit rot', 'grill this skill', or before publishing docs.",
+   "summary": "Interrogate technical documentation, READMEs, architecture docs, runbooks, API guides, and customization files (skills, agents, rules) adversarially — checking whether the doc tells the truth about the code, answers real failure modes, omits unneeded bloat, and avoids bit rot.",
+   "user_only": false,
+   "tools": [
+    "Read",
+    "Glob",
+    "Grep",
+    "Bash",
+    "Edit",
+    "Agent",
+    "AskUserQuestion"
+   ],
+   "writes": true,
+   "uses_agents": true,
+   "extras": [],
+   "path": "claude/skills/doc-grill/SKILL.md",
+   "agy_path": "antigravity/ai-toolbox/skills/doc-grill/SKILL.md"
   },
   {
    "name": "export-csv",
