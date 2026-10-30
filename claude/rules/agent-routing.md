@@ -1,3 +1,4 @@
+<!-- Source file: compiles into antigravity/ai-toolbox/rules/AGENTS.md via tools/build_antigravity.py -->
 # Agent Routing Rules
 
 > These rules apply globally to all projects using the multi-agent workflow.
@@ -106,6 +107,14 @@ If the tech stack for a given layer is still TBD, do not assume a framework or l
 - **Token Loop Prevention**: In sessions with large active context windows (100k+ tokens), repetitive polling loops re-read the entire context on every turn, rapidly burning millions of tokens in minutes.
 - **Windows CLI Tool Paths**: When tools like `gh` are not found on the default session `$env:PATH`, inspect standard locations (e.g., `C:\Program Files\GitHub CLI\gh.exe`) before assuming they are missing.
 - **Windows CRLF & Multiline Edits**: In repositories checked out on Windows with CRLF (`\r\n`) line endings, `edit_file` calls using Unix newlines (`\n`) in multiline targets will fail to match. When editing files with CRLF endings, use a lightweight Python script in `scratch/` that preserves line endings, or inspect line ending format before multiline edits.
+- **Subagents vs Background Tasks Disambiguation**:
+  - `invoke_subagent` launches subagent threads. Subagents are **never** visible in `manage_task` and do not generate background command task IDs. Never call `manage_task` to check on subagents — wait strictly for their reactive wakeup messages.
+  - `manage_task` is reserved exclusively for asynchronous shell commands spawned via `run_command`.
+- **Windows PowerShell Execution Hygiene**: Antigravity's Windows execution shell is already PowerShell. Never invoke nested `powershell -Command "..."` or `powershell.exe` from `run_command` — nested shells incur expensive startup latency (2–4s) and cause variable interpolation bugs (outer `$var` evaluation). Execute cmdlets (`Test-Path`, `Get-Item`, `Select-String`) and scripts directly.
+- **Git Worktree Path Resolution**: When checking repository root files from within a Git worktree, `--show-toplevel` returns the worktree path, not the primary repository root. Use worktree-safe path resolution with `--path-format=absolute` to avoid empty-string parameter binding errors:
+  `Test-Path (Join-Path (Split-Path (git rev-parse --path-format=absolute --git-common-dir) -Parent) '<file>')
+- **Synchronous Timeout Headroom**: For synchronous CLI queries, path checks, and git probes, specify `WaitMsBeforeAsync: 10000` (10 seconds) to ensure normal Windows process startup does not cause premature daemonization into an asynchronous background task.
+- **Subagent Background Task Lifecycle**: Sandboxed worker subagents do not possess `manage_task` (preserving least-privilege tool guardrails). Subagents must never background exploratory probes or leave unresolved tasks running. The parent orchestrator (`@project-manager`) holds `manage_task` and `manage_subagents` and is responsible for inspecting or clearing stalled background tasks.
 
 ---
 

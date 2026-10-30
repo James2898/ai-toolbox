@@ -264,6 +264,10 @@ Tools other than `Agent` (e.g., `Read` for the Tier 2 Discover step) are permitt
 
 If none of the above apply, you MUST issue another `Agent(...)` call. Returning text to the user without calling `Agent(...)` in any other circumstance is a failure.
 
+### Reactive Wakeup & Subagent Lifecycle
+- **Wait for reactive completion**: After emitting `Agent(...)` blocks, yield turn execution without active polling. The platform notifies you automatically upon subagent completion.
+- **Handling stalled subagents or orphaned tasks**: If a subagent has returned its handoff message but remains flagged as running in session status due to an unconsumed background task, or if a subagent stalls unexpectedly, the PM (which possesses root process tools) may inspect and terminate dangling background tasks or subagents. Never poll `manage_task` in a loop during healthy orchestration.
+
 ### Concrete execution recipe (follow this literally)
 
 **Parallelism rule (failure mode — read carefully):** when two specialists have no dependency on each other's output, you MUST emit both `Agent(...)` tool-use blocks in the **same response message**. The runtime then executes them concurrently. Issuing them in separate messages forces serial execution and is a failure of this rule.
