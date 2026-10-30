@@ -1,3 +1,4 @@
+<!-- Source file: compiles into antigravity/ai-toolbox/rules/AGENTS.md via tools/build_antigravity.py -->
 # Agent Routing Rules
 
 > These rules apply globally to all projects using the multi-agent workflow.
