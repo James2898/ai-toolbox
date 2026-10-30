@@ -216,7 +216,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   <main>
     <section id="skills">
       <h2>Skills</h2>
-      <p class="lead">Run a skill in Claude Code as <code>/ai-toolbox:&lt;name&gt;</code>. Skills marked <span class="badge user">User-only</span> start only when you type their command, never on the model's own initiative.</p>
+      <p class="lead">Run any skill in Claude Code as <code>/ai-toolbox:&lt;name&gt;</code>. Skills marked <span class="badge user">User-only</span> run only when explicitly typed; the model never triggers them on its own.</p>
       <div class="toolbar">
         <input type="search" id="q" placeholder="Search skills by name or description" aria-label="Search skills">
         <label><input type="checkbox" id="only-user"> User-only</label>
@@ -230,12 +230,12 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
       <p class="lead" id="wf-intro"></p>
       <div class="wf-tiers" role="tablist" aria-label="Tiers" id="wf-tabs"></div>
       <div class="wf-panel" role="tabpanel" id="wf-panel" aria-live="polite"></div>
-      <p class="wf-source">Summary of <a id="wf-source"><code>project-manager/SKILL.md</code></a> and <a id="wf-rules"><code>rules/agent-routing.md</code></a>. Dashed box: runs only when its condition holds. Tinted box: the PM itself, no agent.</p>
+      <p class="wf-source">Derived from <a id="wf-source"><code>project-manager/SKILL.md</code></a> and <a id="wf-rules"><code>rules/agent-routing.md</code></a>. Dashed borders indicate conditional stages; tinted boxes mark direct project-manager actions.</p>
     </section>
 
     <section id="agents">
       <h2>Agents</h2>
-      <p class="lead">Subagents the skills delegate to. In Claude Code, refer to one as <code>@&lt;name&gt;</code>.</p>
+      <p class="lead">Specialist agents invoked by skills. Reference one in Claude Code with <code>@&lt;name&gt;</code>.</p>
       <div class="grid" id="agent-list"></div>
     </section>
 
@@ -250,13 +250,13 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
 
     <section id="rules">
       <h2>Rules</h2>
-      <p class="lead">Always-on instructions loaded with every session (Antigravity: <code>rules/AGENTS.md</code>).</p>
+      <p class="lead">Instructions loaded into every session. In Antigravity, these compile into <code>rules/AGENTS.md</code>.</p>
       <div class="grid" id="rule-list"></div>
     </section>
 
     <section id="profile">
       <h2>Project profile</h2>
-      <p class="lead">The skills carry no project details. They read them from a profile: the file named by <code>AI_TOOLBOX_PROFILE</code>, else <code>&lt;project root&gt;/.ai-toolbox/profile.yml</code>, else they detect what they can and ask for the rest. Every key is optional. Keep real profiles private. Template: <a id="profile-link"><code>profiles/example.yml</code></a>.</p>
+      <p class="lead">Skills keep no hardcoded project details. Instead, they read settings from <code>AI_TOOLBOX_PROFILE</code> or <code>&lt;project root&gt;/.ai-toolbox/profile.yml</code>, auto-detect what they can, and prompt for anything missing. All keys are optional. Store real profiles outside version control. Starter template: <a id="profile-link"><code>profiles/example.yml</code></a>.</p>
       <div id="profile-list"></div>
     </section>
   </main>
@@ -269,7 +269,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
 <script type="application/json" id="data">{
  "name": "ai-toolbox",
  "version": "",
- "description": "Skills, agents, rules and hooks for day-to-day dev work: QA test documents, spec and PBI review, PR and git helpers, bug-fix workflow, live browser verification, explainers and task orchestration. Project details come from a profile, so the tools work on any repository.",
+ "description": "Skills, agents, rules, and hooks for day-to-day development: QA testing, spec and PBI review, PR and git helpers, bug triage, live browser verification, and orchestration. Project details come from a profile, so the tools adapt to any repository.",
  "license": "MIT",
  "repo": "https://github.com/James2898/ai-toolbox",
  "install": [
@@ -284,7 +284,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
      ]
     },
     {
-     "note": "Then point the skills at your project with a profile (see Project profile below)."
+     "note": "Configure repository settings in a profile (see Project profile below)."
     }
    ]
   },
@@ -1239,17 +1239,17 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   "source": "claude/skills/project-manager/SKILL.md",
   "rules": "claude/rules/agent-routing.md",
   "entry": "/ai-toolbox:project-manager",
-  "intro": "The project-manager skill is a router: it never writes code itself. It checks whether the work already exists, sorts the request into a tier by size and risk, then hands it to specialist agents in a fixed order. Agents with no shared input run in parallel, sent together in one message.",
+  "intro": "The project-manager skill routes tasks without writing code. It checks for existing work, assigns a tier by size and risk, and delegates to specialist agents in order. Independent steps run in parallel within a single message.",
   "preflight": [
    {
     "kind": "pm",
     "title": "Already-done check",
-    "note": "Searches git history and the codebase for the feature. If it already exists and is merged, the PM reports that and stops: no agents run. Skipped for bug fixes and refactors."
+    "note": "Searches git history and the codebase. If the feature already exists on the target branch, the PM reports it and halts before any agent runs. Skipped for bug fixes and refactors."
    },
    {
     "kind": "pm",
     "title": "Classify the tier",
-    "note": "Small, medium or large by the triggers below. Unsure between 1 and 2: unverified backend or 5+ interaction states means Tier 2."
+    "note": "Classifies the task as small, medium, or large based on the triggers below. If uncertain between 1 and 2, unverified backend endpoints or 5+ interaction states elevate the task to Tier 2."
    }
   ],
   "tiers": [
@@ -1284,7 +1284,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
        "agent": "validator-agent",
        "role": "Security / Refactor",
        "conditional": true,
-       "note": "Only if the change touches auth, permissions, data access, migrations, secrets or privileged server code."
+       "note": "Runs only when the change touches auth, permissions, data access, migrations, secrets, or privileged server code."
       }
      ]
     ]
@@ -1314,7 +1314,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
       {
        "agent": "task-logger",
        "role": "Scribe",
-       "note": "Merges both outputs into one self-contained task file."
+       "note": "Consolidates context and requirements into one self-contained task file."
       }
      ],
      [
@@ -1341,7 +1341,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
        "agent": "live-verifier",
        "role": "DOM / Runtime Verifier",
        "conditional": true,
-       "note": "Verifies UI changes in the running app through the DOM. Skipped for non-UI tasks or if the environment is offline. When it passes, the PM offers a post-orchestration manual check with a prioritized list."
+       "note": "Verifies UI changes in the running application through the DOM. Skipped for non-UI tasks or offline environments. On pass, the PM offers an optional manual verification checklist."
       }
      ],
      [
@@ -1349,7 +1349,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
        "agent": "debug-memory",
        "role": "Learner",
        "conditional": true,
-       "note": "Records new root causes and anti-patterns. On a fully clean run the PM writes \"no new entries\" instead of spawning it."
+       "note": "Records new root causes and anti-patterns. On a clean run, the PM logs \"no new entries\" instead of invoking the agent."
       }
      ]
     ]
@@ -1377,14 +1377,14 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
       {
        "kind": "pm",
        "title": "Discover APIs",
-       "note": "The PM reads the project's API inventory. Endpoints are never assumed to exist."
+       "note": "The PM inspects the project API inventory so endpoints are verified before implementation."
       }
      ],
      [
       {
        "agent": "integration-contract",
        "role": "Bridge",
-       "note": "Maps every UI action to an endpoint and marks it EXISTS or MISSING, with a gap plan. If half or more are MISSING, the chain stops and asks the user."
+       "note": "Maps each UI action to an endpoint marked EXISTS or MISSING, with a fallback plan. If 50% or more are MISSING, the chain pauses for user confirmation."
       }
      ],
      [
@@ -1418,7 +1418,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
        "agent": "live-verifier",
        "role": "DOM / Runtime Verifier",
        "conditional": true,
-       "note": "Verifies UI changes in the running app through the DOM. Skipped for non-UI tasks or if the environment is offline. When it passes, the PM offers a post-orchestration manual check with a prioritized list."
+       "note": "Verifies UI changes in the running application through the DOM. Skipped for non-UI tasks or offline environments. On pass, the PM offers an optional manual verification checklist."
       }
      ],
      [
@@ -1426,7 +1426,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
        "agent": "debug-memory",
        "role": "Learner",
        "conditional": true,
-       "note": "Also records MISSING-endpoint fallbacks that shipped. Skipped on a fully clean run."
+       "note": "Also records shipped MISSING-endpoint fallbacks. Skipped on a clean run."
       }
      ]
     ]
@@ -1438,7 +1438,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
     2
    ],
    "after_agent": "fullstack-developer",
-   "note": "If reviewers or live-verifier find a problem, blocker lists go back to fullstack-developer in one pass, then re-verification runs. The same blocker surviving 2 fixes stops the chain and goes to the user. A PASS WITH AMENDMENT (contradicting acceptance criteria, code is fine) is fixed in the task file by the PM, not sent back to the developer."
+   "note": "If reviewers or live-verifier flag blockers, reports return to fullstack-developer together before re-verification. If a blocker persists through 2 fix attempts, the chain pauses for human guidance. For PASS WITH AMENDMENT (conflicting criteria while code is sound), the PM adjusts the task file directly."
   }
  },
  "hooks_description": "Guards for the multi-agent workflow: keep agents out of forbidden files, warn about unstaged task artifacts before commits, and check chain hygiene after agent runs.",
@@ -2015,7 +2015,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
       } else {
         var n = ++step;
         flow.appendChild(el("div", { class: "flow-par" }, [
-          el("div", { class: "flow-par-label", text: "In parallel: one message, " + stage.length + " agents" }),
+          el("div", { class: "flow-par-label", text: "Parallel execution: " + stage.length + " agents in one message" }),
           el("div", { class: "flow-par-grid" }, stage.map(function (s) { return node(s, n); }))
         ]));
       }
@@ -2027,7 +2027,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
       }
     });
     flow.appendChild(arrow());
-    flow.appendChild(el("div", { class: "flow-end", text: "Done: summary to the user, with the learning status" }));
+    flow.appendChild(el("div", { class: "flow-end", text: "Done: task summary and learning status reported to user" }));
     var panel = $("wf-panel");
     panel.textContent = "";
     panel.appendChild(flow);
@@ -2053,7 +2053,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   selectTier(W.tiers[1] || W.tiers[0]);
 
   // Hooks
-  $("hooks-lead").textContent = D.hooks_description + " In the Claude Code plugin they are wired by hooks/hooks.json; Antigravity uses a different hook model, so these stay Claude-only.";
+  $("hooks-lead").textContent = D.hooks_description + " In Claude Code, hooks/hooks.json wires these automatically. Because Antigravity uses a different hook system, these scripts run in Claude Code only.";
   D.hooks.forEach(function (h) {
     $("hook-list").appendChild(el("tr", null, [
       el("td", null, [el("a", { href: blob + h.path }, [el("code", { text: h.name })])]),
