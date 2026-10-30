@@ -843,7 +843,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   },
   {
    "name": "project-manager",
-   "description": "Route development tasks to specialist sub-agents by complexity tier (0/1/2). Use when the user asks to implement a feature, fix a bug, refactor, or run a structured task chain. Invokes codebase-explorer, requirements-engineer, task-logger, fullstack-developer, release-manager, validator-agent, debug-memory via the Agent tool.",
+   "description": "Route development tasks to specialist sub-agents by complexity tier (0/1/2). Use when the user asks to implement a feature, fix a bug, refactor, or run a structured task chain. Invokes codebase-explorer, requirements-engineer, task-logger, fullstack-developer, release-manager, validator-agent, live-verifier, debug-memory via the Agent tool.",
    "summary": "Route development tasks to specialist sub-agents by complexity tier (0/1/2).",
    "user_only": true,
    "tools": null,
@@ -1130,6 +1130,15 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "path": "claude/agents/integration_agent.md"
   },
   {
+   "name": "live-verifier",
+   "description": "Live-tests UI changes against the running app in a browser to prove flows work in the real DOM. Produces a pass/fail evidence table with recorded toasts, network responses, and UI state without saving screenshots. Used in Tier 1 and Tier 2 after parallel review/validate.",
+   "model": "sonnet",
+   "used_by": [
+    "project-manager"
+   ],
+   "path": "claude/agents/live_verifier_agent.md"
+  },
+  {
    "name": "pbi-test-doc-auditor",
    "description": "Compares a PBI document against an existing test case document and produces a structured gap analysis — missing AC coverage, weak assertions, and redundant test cases",
    "model": "sonnet",
@@ -1308,6 +1317,14 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
      ],
      [
       {
+       "agent": "live-verifier",
+       "role": "DOM / Runtime Verifier",
+       "conditional": true,
+       "note": "Verifies UI changes in the running app through the DOM. Skipped for non-UI tasks or if the environment is offline. When it passes, the PM offers a post-orchestration manual check with a prioritized list."
+      }
+     ],
+     [
+      {
        "agent": "debug-memory",
        "role": "Learner",
        "conditional": true,
@@ -1377,6 +1394,14 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
      ],
      [
       {
+       "agent": "live-verifier",
+       "role": "DOM / Runtime Verifier",
+       "conditional": true,
+       "note": "Verifies UI changes in the running app through the DOM. Skipped for non-UI tasks or if the environment is offline. When it passes, the PM offers a post-orchestration manual check with a prioritized list."
+      }
+     ],
+     [
+      {
        "agent": "debug-memory",
        "role": "Learner",
        "conditional": true,
@@ -1392,7 +1417,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
     2
    ],
    "after_agent": "fullstack-developer",
-   "note": "If either reviewer finds a problem, both blocker lists go back to fullstack-developer in one pass, then both reviewers run again. The same blocker surviving 2 fixes stops the chain and goes to the user. A PASS WITH AMENDMENT (contradicting acceptance criteria, code is fine) is fixed in the task file by the PM, not sent back to the developer."
+   "note": "If reviewers or live-verifier find a problem, blocker lists go back to fullstack-developer in one pass, then re-verification runs. The same blocker surviving 2 fixes stops the chain and goes to the user. A PASS WITH AMENDMENT (contradicting acceptance criteria, code is fine) is fixed in the task file by the PM, not sent back to the developer."
   }
  },
  "hooks_description": "Guards for the multi-agent workflow: keep agents out of forbidden files, warn about unstaged task artifacts before commits, and check chain hygiene after agent runs.",

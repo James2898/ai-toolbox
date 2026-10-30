@@ -38,6 +38,7 @@
           { "agent": "release-manager", "role": "QA / Auditor", "note": "Checks every acceptance criterion; updates the changelog on PASS." },
           { "agent": "validator-agent", "role": "Security / Refactor", "note": "Security, performance and architecture audit: APPROVED or BLOCKED." }
         ],
+        [ { "agent": "live-verifier", "role": "DOM / Runtime Verifier", "conditional": true, "note": "Verifies UI changes in the running app through the DOM. Skipped for non-UI tasks or if the environment is offline. When it passes, the PM offers a post-orchestration manual check with a prioritized list." } ],
         [ { "agent": "debug-memory", "role": "Learner", "conditional": true, "note": "Records new root causes and anti-patterns. On a fully clean run the PM writes \"no new entries\" instead of spawning it." } ]
       ]
     },
@@ -60,6 +61,7 @@
           { "agent": "release-manager", "role": "QA / Auditor", "note": "Checks every acceptance criterion; updates the changelog on PASS." },
           { "agent": "validator-agent", "role": "Security / Refactor", "note": "Security, performance and architecture audit: APPROVED or BLOCKED." }
         ],
+        [ { "agent": "live-verifier", "role": "DOM / Runtime Verifier", "conditional": true, "note": "Verifies UI changes in the running app through the DOM. Skipped for non-UI tasks or if the environment is offline. When it passes, the PM offers a post-orchestration manual check with a prioritized list." } ],
         [ { "agent": "debug-memory", "role": "Learner", "conditional": true, "note": "Also records MISSING-endpoint fallbacks that shipped. Skipped on a fully clean run." } ]
       ]
     }
@@ -67,6 +69,6 @@
   "fix_loop": {
     "applies_to": [1, 2],
     "after_agent": "fullstack-developer",
-    "note": "If either reviewer finds a problem, both blocker lists go back to fullstack-developer in one pass, then both reviewers run again. The same blocker surviving 2 fixes stops the chain and goes to the user. A PASS WITH AMENDMENT (contradicting acceptance criteria, code is fine) is fixed in the task file by the PM, not sent back to the developer."
+    "note": "If reviewers or live-verifier find a problem, blocker lists go back to fullstack-developer in one pass, then re-verification runs. The same blocker surviving 2 fixes stops the chain and goes to the user. A PASS WITH AMENDMENT (contradicting acceptance criteria, code is fine) is fixed in the task file by the PM, not sent back to the developer."
   }
 }

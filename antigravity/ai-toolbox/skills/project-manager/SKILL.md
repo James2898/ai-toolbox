@@ -1,10 +1,11 @@
 ---
 name: project-manager
-description: "User-only: run only when the user types /project-manager. Route development tasks to specialist sub-agents by complexity tier (0/1/2). Use when the user asks to implement a feature, fix a bug, refactor, or run a structured task chain. Invokes codebase-explorer, requirements-engineer, task-logger, fullstack-developer, release-manager, validator-agent, debug-memory via the Agent tool."
+description: "User-only: run only when the user types /project-manager. Route development tasks to specialist sub-agents by complexity tier (0/1/2). Use when the user asks to implement a feature, fix a bug, refactor, or run a structured task chain. Invokes codebase-explorer, requirements-engineer, task-logger, fullstack-developer, release-manager, validator-agent, live-verifier, debug-memory via the Agent tool."
 ---
 
 > **Running in Antigravity**: this skill is generated from the Claude Code source.
 > - User-only skill (Claude Code: disable-model-invocation). Start it only when the user typed its slash command; never on your own initiative.
+> - `ask_question` is Antigravity's interactive question tool (Claude Code: AskUserQuestion).
 > - Where this says `Agent(subagent_type: "x")`, delegate via `invoke_subagent` to the subagent `x` with the same prompt.
 
 # Project Manager Skill
@@ -117,7 +118,14 @@ The two `run_command` calls in step 2 above are explicitly permitted under the H
 3. **Log:** Once both complete, route to `@task-logger` (Scribe) to merge both outputs and consolidate decisions into `tasks/TASK-NNN.md`.
 4. **Code:** Route to `@fullstack-developer` (Executor) to implement from the task file.
 5. **Review + Validate (parallel — two tool-use blocks in ONE response):** Invoke `@release-manager` (QA/Auditor) and `@validator-agent` (Security/Refactor) **simultaneously in a single message**. They both cold-read the task file and the same changed files but have **no data dependency** — release-manager checks AC-compliance and owns `CHANGELOG.md`; validator audits security/perf/architecture and never touches `CHANGELOG.md`. Running them concurrently collapses the slowest-of-two into the wall-clock floor instead of summing them. See "Consolidated review/validate fix-loop" below for how their verdicts merge.
-6. **Learn (conditional spawn — see "Conditional debug-memory" below):** If the parallel step produced any material to learn from (validator Findings of any severity, a release-manager FAIL/retry, a PASS WITH AMENDMENT, or a dev-flagged workaround), route to `@debug-memory` (Learner) with the full batch. If BOTH agents came back clean (validator APPROVED with an empty Findings table AND release-manager all-PASS with zero retries and no amendments), **do NOT spawn `@debug-memory`** — write the `MEMORY.md unchanged — no new entries` line yourself in the final summary. The learning intent stays unconditional; only the agent spawn is gated on there being something to learn.
+6. **Live Verify (conditional / sequential after Step 5):** Run `@live-verifier` (DOM / Runtime Verifier) to verify the change on the running app.
+   - **Applicability check:** Check if the diff touches UI/frontend surface (`client_layer`, `.tsx`, `.vue`, css, routes) AND `{local_url}` is defined.
+   - **Non-UI bypass:** If non-UI, mark `SKIPPED: non-UI task` in the task file and proceed to Step 7.
+   - **Env/MCP fallback:** If `{local_url}` is unreachable or browser MCP is missing, mark `SKIPPED: env/mcp offline` and proceed to Step 7.
+   - **Auth wall:** If unauthenticated session is detected, pause at the Permitted Pause Point for the user to log in once in the headed browser window, then resume.
+   - **Fix loop:** If `@live-verifier` returns NEEDS CHANGES, route failure details back to `@fullstack-developer` (see "Live Verification Step & Fix-Loop").
+7. **Learn (conditional spawn — see "Conditional debug-memory" below):** If upstream steps produced any material to learn from (validator Findings of any severity, a release-manager FAIL/retry, a PASS WITH AMENDMENT, a live-verifier failure/trap, or a dev-flagged workaround), route to `@debug-memory` (Learner) with the full batch. If ALL agents came back clean (validator APPROVED with an empty Findings table, release-manager all-PASS with zero retries, and live-verifier PASS or valid non-UI skip), **do NOT spawn `@debug-memory`** — write the `MEMORY.md unchanged — no new entries` line yourself in the final summary. The learning intent stays unconditional; only the agent spawn is gated on there being something to learn.
+8. **(Optional) Post-Orchestration Manual Verification:** After the whole chain completes (post-debug-memory), if `@live-verifier` ran and passed, ask the user if they want to run manual verification on the live app. If accepted, start or confirm the dev server is active, provide the prioritized checklist of what to verify (P1 core flows, P2 edge cases, P3 sibling regressions), and wait for user confirmation.
 
 ### Tier 2 — Extended Path
 
@@ -135,7 +143,14 @@ The two `run_command` calls in step 2 above are explicitly permitted under the H
 5. **Log:** Route to `@task-logger` (Scribe) to consolidate all decisions, specs, and the Technical Schema into `tasks/TASK-NNN.md`.
 6. **Code:** Route to `@fullstack-developer` (Executor) for FE implementation and any approved backend gap work.
 7. **Review + Validate (parallel — two tool-use blocks in ONE response):** Invoke `@release-manager` (QA/Auditor) and `@validator-agent` (Security/Refactor) **simultaneously in a single message**. They both cold-read the task file and the same changed files but have **no data dependency** — release-manager checks AC-compliance and owns `CHANGELOG.md`; validator audits security/perf/architecture and never touches `CHANGELOG.md`. Running them concurrently collapses the slowest-of-two into the wall-clock floor instead of summing them. See "Consolidated review/validate fix-loop" below for how their verdicts merge.
-8. **Learn (conditional spawn — see "Conditional debug-memory" below):** If the parallel step produced any material to learn from (validator Findings of any severity, a release-manager FAIL/retry, a PASS WITH AMENDMENT, an integration-contract MISSING-endpoint workaround shipping into v1, or a dev-flagged workaround), route to `@debug-memory` (Learner) with the full batch. If BOTH agents came back clean (validator APPROVED with an empty Findings table AND release-manager all-PASS with zero retries and no amendments) AND there were no MISSING-endpoint gap fallbacks, **do NOT spawn `@debug-memory`** — write the `MEMORY.md unchanged — no new entries` line yourself in the final summary. The learning intent stays unconditional; only the agent spawn is gated on there being something to learn.
+8. **Live Verify (conditional / sequential after Step 7):** Run `@live-verifier` (DOM / Runtime Verifier) to verify the change on the running app.
+   - **Applicability check:** Check if the diff touches UI/frontend surface (`client_layer`, `.tsx`, `.vue`, css, routes) AND `{local_url}` is defined.
+   - **Non-UI bypass:** If non-UI, mark `SKIPPED: non-UI task` in the task file and proceed to Step 9.
+   - **Env/MCP fallback:** If `{local_url}` is unreachable or browser MCP is missing, mark `SKIPPED: env/mcp offline` and proceed to Step 9.
+   - **Auth wall:** If unauthenticated session is detected, pause at the Permitted Pause Point for the user to log in once in the headed browser window, then resume.
+   - **Fix loop:** If `@live-verifier` returns NEEDS CHANGES, route failure details back to `@fullstack-developer` (see "Live Verification Step & Fix-Loop").
+9. **Learn (conditional spawn — see "Conditional debug-memory" below):** If upstream steps produced any material to learn from (validator Findings of any severity, a release-manager FAIL/retry, a PASS WITH AMENDMENT, an integration-contract MISSING-endpoint workaround shipping into v1, a live-verifier failure/trap, or a dev-flagged workaround), route to `@debug-memory` (Learner) with the full batch. If ALL review agents came back clean (validator APPROVED with empty Findings, release-manager all-PASS with zero retries, live-verifier PASS or valid non-UI skip, and no MISSING-endpoint gap fallbacks), **do NOT spawn `@debug-memory`** — write the `MEMORY.md unchanged — no new entries` line yourself in the final summary. The learning intent stays unconditional; only the agent spawn is gated on there being something to learn.
+10. **(Optional) Post-Orchestration Manual Verification:** After the whole chain completes (post-debug-memory), if `@live-verifier` ran and passed, ask the user if they want to run manual verification on the live app. If accepted, start or confirm the dev server is active, provide the prioritized checklist of what to verify (P1 core flows, P2 edge cases, P3 sibling regressions), and wait for user confirmation.
 
 ### Bug Resolution (Any Tier)
 
@@ -160,6 +175,7 @@ When invoking `@debug-memory` as step 7 (Tier 1) / step 9 (Tier 2), the prompt m
 - **Release-manager fix-loop history:** any AC that FAILed and required a retry, with the diagnosis from the release-manager's NEEDS CHANGES report.
 - **Dev-side issues:** anything `@fullstack-developer`'s Resolution section flagged as a workaround, anti-pattern observed, or "be careful with X next time."
 - **Integration-contract surprises (Tier 2 only):** any MISSING endpoint that required a gap-handling fallback shipping into v1, which future tasks will inherit.
+- **Live-verifier history:** any DOM assertion or network failure from `@live-verifier` that required a fix loop, or UI environment traps observed.
 - **Last decision:** "End-of-chain learning pass for TASK-NNN. Decide per-item whether to write a new MEMORY.md entry. Exit cleanly if nothing is new."
 
 Debug-memory's responsibility is to:
@@ -191,7 +207,7 @@ Because `@release-manager` and `@validator-agent` now run **in parallel** (Tier 
 When both agents have returned, classify the combined result:
 
 1. **Both clean** — release-manager `PASS` AND validator `APPROVED`:
-   - Proceed to the Learn step. The release-manager has already committed the `CHANGELOG.md` update on its PASS path.
+   - Proceed to the Live Verify step (Tier 1 step 6 / Tier 2 step 8). The release-manager has already committed the `CHANGELOG.md` update on its PASS path.
 
 2. **Either or both reported fixable problems** — release-manager `NEEDS CHANGES` (genuine AC FAILs) AND/OR validator `NEEDS CHANGES`/`BLOCKED`:
    - **Collect both blocker lists into ONE task input** and route to `@fullstack-developer` a single time. Label each blocker with its source (`[release-manager AC-N]` or `[validator Blocker #N]`) so the dev fixes everything in one pass.
@@ -208,6 +224,27 @@ When both agents have returned, classify the combined result:
 
 **CHANGELOG sequencing note:** `@release-manager` commits `CHANGELOG.md` only on its own PASS verdict. If release-manager returns NEEDS CHANGES, no CHANGELOG commit happens until the fix-loop produces a PASS. Validator never writes `CHANGELOG.md`, so there is no write conflict between the two parallel agents.
 
+### Live Verification Step & Fix-Loop
+
+Once the parallel review/validate step succeeds (`release-manager` PASS and `validator-agent` APPROVED):
+
+1. **Evaluate applicability:**
+   - Check if the task touched frontend/UI files (components, styles, routes, client requests) AND `{local_url}` is configured.
+   - If non-UI: record `SKIPPED: non-UI task` under `## Live Verification` in the task file, and proceed directly to Learn.
+   - If `{local_url}` is unreachable or Playwright MCP is unavailable: record `SKIPPED: env/mcp offline` with explanation, and proceed directly to Learn.
+
+2. **Invoke `@live-verifier`:**
+   - Spawn `@live-verifier` with the Handoff Trio.
+   - **No screenshots rule:** `@live-verifier` never captures or saves screenshots to disk, keeping execution fast, clutter-free, and safe for public repositories.
+   - If `@live-verifier` reports `UNAUTHENTICATED_SESSION` on a login-required page: hit Permitted Pause Point #4, prompt the user to log in once in the headed browser window, and resume.
+
+3. **Handle `@live-verifier` Verdict:**
+   - **PASS** (or SKIPPED): Proceed directly to the Learn step (`@debug-memory`). The autonomous chain runs through all agents to completion without mid-chain pauses.
+   - **NEEDS CHANGES:**
+     - Collect live verification failures (case description, observed DOM state, network status/response, missing toast) into a single fix task for `@fullstack-developer`.
+     - After `@fullstack-developer` completes fixes, re-run `@release-manager` and `@validator-agent` in parallel, followed by `@live-verifier`.
+     - Retry cap: if the same UI verification failure survives **2 fix attempts**, stop the chain and surface to the user.
+
 ### Conditional debug-memory
 
 `@debug-memory` is on the `haiku` model (cheap) but the spawn itself still costs wall-time on every task. The learning *intent* remains unconditional; only the *spawn* is gated.
@@ -218,14 +255,33 @@ When both agents have returned, classify the combined result:
   - Validator's final report has a non-empty Findings table (any severity — Blocker, Warning, or Suggestion).
   - Release-manager FAILed any AC at least once (i.e. the fix-loop ran).
   - Release-manager returned PASS WITH AMENDMENT (an AC contradiction was found).
+  - `@live-verifier` encountered any failure that required a fix loop or uncovered an env trap.
   - The dev's Resolution notes flagged a workaround, deviation, or "be careful with X."
   - (Tier 2) An integration-contract `MISSING` endpoint shipped a gap-handling fallback into v1.
 
-- **Skip the spawn** (and write the `no new entries` line yourself) only when ALL are false: validator APPROVED with empty Findings, release-manager all-PASS first try with no amendments, no dev workaround flags, no MISSING-endpoint fallbacks.
+- **Skip the spawn** (and write the `no new entries` line yourself) only when ALL are false: validator APPROVED with empty Findings, release-manager all-PASS first try with no amendments, live-verifier PASS or valid non-UI skip, no dev workaround flags, no MISSING-endpoint fallbacks.
 
 When you skip, your final summary must still report the learning status explicitly: `MEMORY.md unchanged — no new entries (clean run: validator APPROVED, all ACs PASS first attempt).` Do not silently omit it — the visible status is what proves the learning step was not forgotten.
 
 When you DO spawn, pass the full batch exactly as described in "Bug Resolution (Any Tier)" below. Debug-memory still filters per-item; the gate above only decides whether there is any candidate worth a spawn at all.
+
+### Post-Orchestration Manual Verification Offer
+
+Once the entire orchestration chain finishes (all specialist agents, reviews, and `@debug-memory` have completed):
+
+If `@live-verifier` executed and produced a **PASS** verdict:
+1. Prompt the user (via `ask_question`):
+   - Question: *"The orchestration has finished. Automated live verification passed. Would you like to run manual verification on the live app before finalizing?"*
+   - Options: `["(Recommended) No, finalize task", "Yes, let me manually verify"]`
+2. **If the user selects "Yes":**
+   - **Ensure dev server is running:** Check if `{local_url}` is responsive. If not, launch the dev server in the background (using profile `commands.dev_server` or `package.json` dev script, e.g. `npm run dev` / `pnpm dev`).
+   - **Present the Prioritized Manual Verification Guide:** Display the prioritized checklist extracted from `@live-verifier`'s report with target routes, actions, and expected results:
+     - **P1 (Core flows):** Primary user journeys touched by the task's acceptance criteria.
+     - **P2 (Edge / Error branches):** Validation errors, empty states, cancel/dismiss flows.
+     - **P3 (Sibling regressions):** Mirrored or adjacent screens sharing modified hooks/components.
+   - **Pause for confirmation:** Halt orchestration (Permitted Pause Point #5) until the user indicates manual verification is complete.
+3. **If the user selects "No" (or once manual verification concludes):**
+   - Emit the final completion summary to the user.
 
 ### Validator Issues BLOCKED Verdict (within the parallel step)
 
@@ -262,8 +318,10 @@ Tools other than `Agent` (e.g., `Read` for the Tier 2 Discover step) are permitt
 
 1. `@requirements-engineer` returns with a blocking Open Question that cannot be resolved from context.
 2. `@integration-contract` marks ≥50% of required endpoints as `MISSING` (all-MISSING escalation).
-3. The consolidated review/validate fix-loop breaches its retry cap (the same blocker — from `@release-manager` NEEDS CHANGES OR `@validator-agent` BLOCKED — survives 2 fix attempts).
-4. Every required specialist for the assigned tier has run and the chain is complete.
+3. The review/validate/live-verify fix-loop breaches its retry cap (the same blocker — from `@release-manager` NEEDS CHANGES, `@validator-agent` BLOCKED, OR `@live-verifier` failure — survives 2 fix attempts).
+4. `@live-verifier` encounters an unauthenticated session on a login-required page (prompt the user to log in once in the headed browser window, then resume).
+5. The user opts into manual live verification after the full orchestration chain completes (PM ensures the dev server is active, presents the prioritized checklist, and waits for user confirmation before finalizing).
+6. Every required specialist for the assigned tier has run and the chain is complete.
 
 If none of the above apply, you MUST issue another `Agent(...)` call. Returning text to the user without calling `Agent(...)` in any other circumstance is a failure.
 
@@ -296,10 +354,11 @@ For a Tier 2 task your turn looks like this:
    - `Agent({subagent_type: "validator-agent", ...})`
 
    Both run concurrently — they cold-read the same files but have no data dependency. Wait for BOTH to return. Then apply the "Consolidated review/validate fix-loop": if either reported fixable blockers, collect both lists into ONE `fullstack-developer` fix task (step 5), then re-emit this parallel pair. Retry cap 2 per blocker.
-7. **Conditional Learn:** evaluate the "Conditional debug-memory" gate. If anything is worth learning (validator findings, a fix-loop, an amendment, a dev workaround, a MISSING-endpoint fallback), call `Agent({subagent_type: "debug-memory", ...})` with the full batch. If both agents came back clean on the first pass, SKIP the spawn and write the `no new entries` line yourself.
-8. Emit final completion summary to the user (include MEMORY.md update status — e.g., "BUG-023 recorded" or "MEMORY.md unchanged — no new entries (clean run)").
+7. **Live Verify:** Check applicability gate (diff touches UI and `{local_url}` configured). If applicable, call `Agent({subagent_type: "live-verifier", ...})`. If unauthenticated session detected, pause for user login in headed window. If failures occur, route to dev fix-loop (retry cap 2). If non-UI or env offline, mark SKIPPED and proceed to Step 8.
+8. **Conditional Learn:** evaluate the "Conditional debug-memory" gate. If anything is worth learning (validator findings, a fix-loop, an amendment, a dev workaround, a MISSING-endpoint fallback, or live-verifier failure/trap), call `Agent({subagent_type: "debug-memory", ...})` with the full batch. If all agents came back clean on the first pass, SKIP the spawn and write the `no new entries` line yourself.
+9. **Post-Orchestration Manual Verification & Summary:** Once all agents and debug-memory have completed, if `@live-verifier` passed, prompt the user whether they want to run manual verification on the live app. If accepted, ensure the dev server is active, present the prioritized manual verification checklist, and pause for user confirmation. Finally, emit the completion summary.
 
-**Tier 1** follows the same pattern: step 0 is the pre-flight check (§0), step 1 is the front parallel pair (codebase-explorer + requirements-engineer in a single message), then serial through task-logger → fullstack-developer → **[release-manager ‖ validator-agent in a second parallel pair]** → **debug-memory (conditional spawn — skip on a fully clean run, write the `no new entries` line yourself)**.
+**Tier 1** follows the same pattern: step 0 is the pre-flight check (§0), step 1 is the front parallel pair (codebase-explorer + requirements-engineer in a single message), then serial through task-logger → fullstack-developer → **[release-manager ‖ validator-agent in a second parallel pair]** → **live-verifier (conditional on UI diff & env readiness)** → **debug-memory (conditional spawn — skip on a fully clean run, write the `no new entries` line yourself)**.
 
 **Tier 0** has no parallel pair — explorer's output feeds the developer directly. Run serial.
 
