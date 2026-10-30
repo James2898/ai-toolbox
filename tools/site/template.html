@@ -216,7 +216,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   <main>
     <section id="skills">
       <h2>Skills</h2>
-      <p class="lead">Run a skill in Claude Code as <code>/ai-toolbox:&lt;name&gt;</code>. Skills marked <span class="badge user">User-only</span> start only when you type their command, never on the model's own initiative.</p>
+      <p class="lead">Run any skill in Claude Code as <code>/ai-toolbox:&lt;name&gt;</code>. Skills marked <span class="badge user">User-only</span> run only when explicitly typed; the model never triggers them on its own.</p>
       <div class="toolbar">
         <input type="search" id="q" placeholder="Search skills by name or description" aria-label="Search skills">
         <label><input type="checkbox" id="only-user"> User-only</label>
@@ -230,12 +230,12 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
       <p class="lead" id="wf-intro"></p>
       <div class="wf-tiers" role="tablist" aria-label="Tiers" id="wf-tabs"></div>
       <div class="wf-panel" role="tabpanel" id="wf-panel" aria-live="polite"></div>
-      <p class="wf-source">Summary of <a id="wf-source"><code>project-manager/SKILL.md</code></a> and <a id="wf-rules"><code>rules/agent-routing.md</code></a>. Dashed box: runs only when its condition holds. Tinted box: the PM itself, no agent.</p>
+      <p class="wf-source">Derived from <a id="wf-source"><code>project-manager/SKILL.md</code></a> and <a id="wf-rules"><code>rules/agent-routing.md</code></a>. Dashed borders indicate conditional stages; tinted boxes mark direct project-manager actions.</p>
     </section>
 
     <section id="agents">
       <h2>Agents</h2>
-      <p class="lead">Subagents the skills delegate to. In Claude Code, refer to one as <code>@&lt;name&gt;</code>.</p>
+      <p class="lead">Specialist agents invoked by skills. Reference one in Claude Code with <code>@&lt;name&gt;</code>.</p>
       <div class="grid" id="agent-list"></div>
     </section>
 
@@ -250,13 +250,13 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
 
     <section id="rules">
       <h2>Rules</h2>
-      <p class="lead">Always-on instructions loaded with every session (Antigravity: <code>rules/AGENTS.md</code>).</p>
+      <p class="lead">Instructions loaded into every session. In Antigravity, these compile into <code>rules/AGENTS.md</code>.</p>
       <div class="grid" id="rule-list"></div>
     </section>
 
     <section id="profile">
       <h2>Project profile</h2>
-      <p class="lead">The skills carry no project details. They read them from a profile: the file named by <code>AI_TOOLBOX_PROFILE</code>, else <code>&lt;project root&gt;/.ai-toolbox/profile.yml</code>, else they detect what they can and ask for the rest. Every key is optional. Keep real profiles private. Template: <a id="profile-link"><code>profiles/example.yml</code></a>.</p>
+      <p class="lead">Skills keep no hardcoded project details. Instead, they read settings from <code>AI_TOOLBOX_PROFILE</code> or <code>&lt;project root&gt;/.ai-toolbox/profile.yml</code>, auto-detect what they can, and prompt for anything missing. All keys are optional. Store real profiles outside version control. Starter template: <a id="profile-link"><code>profiles/example.yml</code></a>.</p>
       <div id="profile-list"></div>
     </section>
   </main>
@@ -443,7 +443,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
       } else {
         var n = ++step;
         flow.appendChild(el("div", { class: "flow-par" }, [
-          el("div", { class: "flow-par-label", text: "In parallel: one message, " + stage.length + " agents" }),
+          el("div", { class: "flow-par-label", text: "Parallel execution: " + stage.length + " agents in one message" }),
           el("div", { class: "flow-par-grid" }, stage.map(function (s) { return node(s, n); }))
         ]));
       }
@@ -455,7 +455,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
       }
     });
     flow.appendChild(arrow());
-    flow.appendChild(el("div", { class: "flow-end", text: "Done: summary to the user, with the learning status" }));
+    flow.appendChild(el("div", { class: "flow-end", text: "Done: task summary and learning status reported to user" }));
     var panel = $("wf-panel");
     panel.textContent = "";
     panel.appendChild(flow);
@@ -481,7 +481,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   selectTier(W.tiers[1] || W.tiers[0]);
 
   // Hooks
-  $("hooks-lead").textContent = D.hooks_description + " In the Claude Code plugin they are wired by hooks/hooks.json; Antigravity uses a different hook model, so these stay Claude-only.";
+  $("hooks-lead").textContent = D.hooks_description + " In Claude Code, hooks/hooks.json wires these automatically. Because Antigravity uses a different hook system, these scripts run in Claude Code only.";
   D.hooks.forEach(function (h) {
     $("hook-list").appendChild(el("tr", null, [
       el("td", null, [el("a", { href: blob + h.path }, [el("code", { text: h.name })])]),
