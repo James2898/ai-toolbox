@@ -1,5 +1,5 @@
 {
-  "description": "Guards for the multi-agent workflow: keep agents out of forbidden files, warn about unstaged task artifacts before commits, and check chain hygiene after agent runs.",
+  "description": "Guards for the multi-agent workflow: keep agents out of forbidden files, warn about unstaged task artifacts before commits, deny oversized Bash file writes, and check chain hygiene after agent runs.",
   "hooks": {
     "PreToolUse": [
       {
@@ -7,6 +7,12 @@
         "hooks": [
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/agent-read-guard.sh" },
           { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-commit-staging-check.sh" }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/large-bash-write-guard.sh" }
         ]
       }
     ],

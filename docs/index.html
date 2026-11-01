@@ -1441,7 +1441,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "note": "If reviewers or live-verifier flag blockers, reports return to fullstack-developer together before re-verification. If a blocker persists through 2 fix attempts, the chain pauses for human guidance. For PASS WITH AMENDMENT (conflicting criteria while code is sound), the PM adjusts the task file directly."
   }
  },
- "hooks_description": "Guards for the multi-agent workflow: keep agents out of forbidden files, warn about unstaged task artifacts before commits, and check chain hygiene after agent runs.",
+ "hooks_description": "Guards for the multi-agent workflow: keep agents out of forbidden files, warn about unstaged task artifacts before commits, deny oversized Bash file writes, and check chain hygiene after agent runs.",
  "hooks": [
   {
    "name": "agent-read-guard.sh",
@@ -1456,6 +1456,13 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "matcher": "Read|Bash",
    "summary": "PreToolUse hook on Bash: warn when `git commit` is about to run with important project artifacts modified-but-unstaged.",
    "path": "claude/hooks/pre-commit-staging-check.sh"
+  },
+  {
+   "name": "large-bash-write-guard.sh",
+   "event": "PreToolUse",
+   "matcher": "Bash",
+   "summary": "PreToolUse hook on Bash: deny very large commands that write a file through a heredoc, output redirection or tee, and tell the caller to use the Write tool instead.",
+   "path": "claude/hooks/large-bash-write-guard.sh"
   },
   {
    "name": "pm-parallel-check.sh",
