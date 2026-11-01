@@ -3,10 +3,10 @@
   "source": "claude/skills/project-manager/SKILL.md",
   "rules": "claude/rules/agent-routing.md",
   "entry": "/ai-toolbox:project-manager",
-  "intro": "The project-manager skill is a router: it never writes code itself. It checks whether the work already exists, sorts the request into a tier by size and risk, then hands it to specialist agents in a fixed order. Agents with no shared input run in parallel, sent together in one message.",
+  "intro": "The project-manager skill routes tasks without writing code. It checks for existing work, assigns a tier by size and risk, and delegates to specialist agents in order. Independent steps run in parallel within a single message.",
   "preflight": [
-    { "kind": "pm", "title": "Already-done check", "note": "Searches git history and the codebase for the feature. If it already exists and is merged, the PM reports that and stops: no agents run. Skipped for bug fixes and refactors." },
-    { "kind": "pm", "title": "Classify the tier", "note": "Small, medium or large by the triggers below. Unsure between 1 and 2: unverified backend or 5+ interaction states means Tier 2." }
+    { "kind": "pm", "title": "Already-done check", "note": "Searches git history and the codebase. If the feature already exists on the target branch, the PM reports it and halts before any agent runs. Skipped for bug fixes and refactors." },
+    { "kind": "pm", "title": "Classify the tier", "note": "Classifies the task as small, medium, or large based on the triggers below. If uncertain between 1 and 2, unverified backend endpoints or 5+ interaction states elevate the task to Tier 2." }
   ],
   "tiers": [
     {
@@ -18,7 +18,7 @@
       "stages": [
         [ { "agent": "codebase-explorer", "role": "Context Finder", "note": "Finds the files and patterns to reuse. Returns them inline; no task file is created." } ],
         [ { "agent": "fullstack-developer", "role": "Executor", "note": "Makes the change, then self-checks: exactly what was asked, no stray files, no new data access." } ],
-        [ { "agent": "validator-agent", "role": "Security / Refactor", "conditional": true, "note": "Only if the change touches auth, permissions, data access, migrations, secrets or privileged server code." } ]
+        [ { "agent": "validator-agent", "role": "Security / Refactor", "conditional": true, "note": "Runs only when the change touches auth, permissions, data access, migrations, secrets, or privileged server code." } ]
       ]
     },
     {
@@ -32,14 +32,14 @@
           { "agent": "codebase-explorer", "role": "Context Finder", "note": "Reusable code and conventions." },
           { "agent": "requirements-engineer", "role": "Gatekeeper", "note": "Ambiguities, edge cases, testable acceptance criteria. Pauses for the user on a blocking question." }
         ],
-        [ { "agent": "task-logger", "role": "Scribe", "note": "Merges both outputs into one self-contained task file." } ],
+        [ { "agent": "task-logger", "role": "Scribe", "note": "Consolidates context and requirements into one self-contained task file." } ],
         [ { "agent": "fullstack-developer", "role": "Executor", "note": "Implements exactly what the task file says." } ],
         [
           { "agent": "release-manager", "role": "QA / Auditor", "note": "Checks every acceptance criterion; updates the changelog on PASS." },
           { "agent": "validator-agent", "role": "Security / Refactor", "note": "Security, performance and architecture audit: APPROVED or BLOCKED." }
         ],
-        [ { "agent": "live-verifier", "role": "DOM / Runtime Verifier", "conditional": true, "note": "Verifies UI changes in the running app through the DOM. Skipped for non-UI tasks or if the environment is offline. When it passes, the PM offers a post-orchestration manual check with a prioritized list." } ],
-        [ { "agent": "debug-memory", "role": "Learner", "conditional": true, "note": "Records new root causes and anti-patterns. On a fully clean run the PM writes \"no new entries\" instead of spawning it." } ]
+        [ { "agent": "live-verifier", "role": "DOM / Runtime Verifier", "conditional": true, "note": "Verifies UI changes in the running application through the DOM. Skipped for non-UI tasks or offline environments. On pass, the PM offers an optional manual verification checklist." } ],
+        [ { "agent": "debug-memory", "role": "Learner", "conditional": true, "note": "Records new root causes and anti-patterns. On a clean run, the PM logs \"no new entries\" instead of invoking the agent." } ]
       ]
     },
     {
@@ -53,22 +53,22 @@
           { "agent": "codebase-explorer", "role": "Context Finder", "note": "Reusable code and conventions." },
           { "agent": "requirements-engineer", "role": "Gatekeeper", "note": "Ambiguities, edge cases, testable acceptance criteria. Pauses for the user on a blocking question." }
         ],
-        [ { "kind": "pm", "title": "Discover APIs", "note": "The PM reads the project's API inventory. Endpoints are never assumed to exist." } ],
-        [ { "agent": "integration-contract", "role": "Bridge", "note": "Maps every UI action to an endpoint and marks it EXISTS or MISSING, with a gap plan. If half or more are MISSING, the chain stops and asks the user." } ],
+        [ { "kind": "pm", "title": "Discover APIs", "note": "The PM inspects the project API inventory so endpoints are verified before implementation." } ],
+        [ { "agent": "integration-contract", "role": "Bridge", "note": "Maps each UI action to an endpoint marked EXISTS or MISSING, with a fallback plan. If 50% or more are MISSING, the chain pauses for user confirmation." } ],
         [ { "agent": "task-logger", "role": "Scribe", "note": "Consolidates specs, decisions and the technical schema into one task file." } ],
         [ { "agent": "fullstack-developer", "role": "Executor", "note": "Frontend work plus any approved backend gap work." } ],
         [
           { "agent": "release-manager", "role": "QA / Auditor", "note": "Checks every acceptance criterion; updates the changelog on PASS." },
           { "agent": "validator-agent", "role": "Security / Refactor", "note": "Security, performance and architecture audit: APPROVED or BLOCKED." }
         ],
-        [ { "agent": "live-verifier", "role": "DOM / Runtime Verifier", "conditional": true, "note": "Verifies UI changes in the running app through the DOM. Skipped for non-UI tasks or if the environment is offline. When it passes, the PM offers a post-orchestration manual check with a prioritized list." } ],
-        [ { "agent": "debug-memory", "role": "Learner", "conditional": true, "note": "Also records MISSING-endpoint fallbacks that shipped. Skipped on a fully clean run." } ]
+        [ { "agent": "live-verifier", "role": "DOM / Runtime Verifier", "conditional": true, "note": "Verifies UI changes in the running application through the DOM. Skipped for non-UI tasks or offline environments. On pass, the PM offers an optional manual verification checklist." } ],
+        [ { "agent": "debug-memory", "role": "Learner", "conditional": true, "note": "Also records shipped MISSING-endpoint fallbacks. Skipped on a clean run." } ]
       ]
     }
   ],
   "fix_loop": {
     "applies_to": [1, 2],
     "after_agent": "fullstack-developer",
-    "note": "If reviewers or live-verifier find a problem, blocker lists go back to fullstack-developer in one pass, then re-verification runs. The same blocker surviving 2 fixes stops the chain and goes to the user. A PASS WITH AMENDMENT (contradicting acceptance criteria, code is fine) is fixed in the task file by the PM, not sent back to the developer."
+    "note": "If reviewers or live-verifier flag blockers, reports return to fullstack-developer together before re-verification. If a blocker persists through 2 fix attempts, the chain pauses for human guidance. For PASS WITH AMENDMENT (conflicting criteria while code is sound), the PM adjusts the task file directly."
   }
 }

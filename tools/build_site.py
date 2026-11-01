@@ -314,7 +314,7 @@ def build_data():
             {"id": "tab-claude", "steps": [
                 {"note": "Add this repository as a plugin marketplace, then install the plugin:",
                  "commands": [f"claude plugin marketplace add {slug}", f"claude plugin install {plugin['name']}@{plugin['name']}"]},
-                {"note": "Then point the skills at your project with a profile (see Project profile below)."},
+                {"note": "Configure repository settings in a profile (see Project profile below)."},
             ]},
             {"id": "tab-agy", "steps": [
                 {"note": "Install from the repository:",
