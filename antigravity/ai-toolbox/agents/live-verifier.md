@@ -2,6 +2,7 @@
 name: live-verifier
 description: "Live-tests UI changes against the running app in a browser to prove flows work in the real DOM. Produces a pass/fail evidence table with recorded toasts, network responses, and UI state without saving screenshots. Used in Tier 1 and Tier 2 after parallel review/validate."
 model: pro
+inheritMcp: true
 tools:
   - read_file
   - write_file
@@ -9,7 +10,6 @@ tools:
   - run_command
   - send_message
   - schedule
-  - call_mcp_tool
 ---
 # Role: Live Verifier (@live-verifier)
 
