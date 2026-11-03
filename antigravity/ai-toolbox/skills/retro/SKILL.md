@@ -58,11 +58,15 @@ Match each cause to where a fix would have prevented it:
 
 Before proposing a memory entry, grep `{memory_dir}` for an existing one: update it rather than adding a duplicate. Before proposing a skill edit, read the current step; the fix may belong one step earlier.
 
+Check where the target file is published before putting anything in it. A file in a public or shared repo (a toolbox, a dotfiles backup) gets generic wording only: no employer, product, repository, host, schema, table or column names, and no internal paths. Work-specific facts go to the memory folder or to a file no repo tracks (`git -C <dir> check-ignore -v <file>` confirms).
+
 Done when: each cause has one proposed fix with its target file.
 
 ### 3. Rank and present
 
 Before the table, re-check each finding's evidence with a command: a claim that something is missing needs a search of the whole repo or plugin, not one folder. Correct or drop any finding that fails the check.
+
+Then leak-check the drafted text of every fix aimed at a public or shared repo: match it against the private leak patterns (`AI_TOOLBOX_LEAK_PATTERNS`, default `~/.config/ai-toolbox/leak-patterns.txt`, one case-insensitive regex per line) and reword any hit. Never print the matched value.
 
 ```markdown
 ## Retro — <session topic> (<YYYY-MM-DD>)
@@ -83,8 +87,9 @@ Output the complete table and item descriptions as regular markdown text, then a
 
 - Memory: write or update the entry and its index line.
 - Skills, agents, rules, hooks, permissions: show the diff first and apply after the user confirms that diff; these change how every future session behaves.
+- After applying, run the repo's leak check in every repo you edited (the `leak-check` skill; in the toolbox, `python3 -I tools/leak_check.py`). Report findings by file:line only, reword, and re-run until it exits 0 for the files you touched.
 - Report what was applied, and which items were left for later.
 
 ## Boundaries
 
-Quote only what is needed to show the friction. Leave out secrets, tokens and personal data from the session, and colleagues' names from anything written to a shared file.
+Quote only what is needed to show the friction. Leave out secrets, tokens and personal data from the session, colleagues' names from anything written to a shared file, and work-specific names from anything written to a public repo.
