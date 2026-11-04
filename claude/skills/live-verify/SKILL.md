@@ -160,6 +160,8 @@ Then STOP — report only; do not change code or open PRs. If a case FAILED, des
 
 If a flow genuinely can't be reached by the DOM (missing fixture data, a picker with no options, a state the UI can't produce), say so and fall back to the **API-level proof**: call the endpoint directly and assert the response shape the UI branches on (e.g. a per-item status envelope). Mark it clearly as "backend-condition verified, UI branch inferred from unit tests" rather than claiming a full live pass. Don't manufacture a green result.
 
+If the flow needs a page the Playwright MCP cannot open (a third-party sign-in or consent popup), say so before planning. Hand the browser steps to the user to run in their own browser, and collect the evidence yourself from the backend: database rows before and after, the server's query or request log for that request, and the status and body the user reads from DevTools. Mark it "user-driven, backend-verified", and put the steps in your final message so the user sees them in full.
+
 ## Reference files
 
 - `references/playwright-mcp.md` — which MCP to use and why, the origin guardrail, connecting, the auth story, the tool map, and gotchas.

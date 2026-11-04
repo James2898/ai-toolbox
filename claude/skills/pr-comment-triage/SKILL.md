@@ -294,6 +294,7 @@ The user drives everything past the table. Handle each request with its own scop
 - **"Draft the reply to C1 / C3"** → produce a **paste-ready ```markdown fenced block** (verdict up front — applied / partially applied / declining — then 1–3 bullets with reasoning; cite the PBI Out-of-Scope verbatim when that's the decline basis). Keep it concise. Do **not** post it — the user pastes it, or explicitly says "post it".
 - **"Post the reply to C1"** → posting is a separate, high-consequence action (public, attributed to the user). Confirm the exact target thread, then post to **that thread only** via `gh api .../replies`. "Post to C1" never covers C2.
 - **Resolved + fixed Devin comments** worth a durable lesson → offer to route them to `@debug-memory` once (batched), per the peer-review pattern. Don't auto-run it.
+- **Re-validating after fixes** → when you run the validator again after applying review fixes, list in its brief which reviewer comment each edit answers. Otherwise it reports the requested edits as scope creep.
 
 Never generalize one approval to the next comment. Code-fix permission ≠ reply permission ≠ post permission.
 
