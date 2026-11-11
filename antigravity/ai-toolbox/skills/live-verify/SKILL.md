@@ -39,6 +39,7 @@ Use `browser_evaluate` for all DOM work. Use screenshots only to *look* (confirm
 - **Seed + auto-cleanup, with an identifiable prefix.** Create your own throwaway entities via the app's API, and **name every one with the run prefix `QA-LV-<HHMM>-`** (e.g. `QA-LV-1432-grpA`) so seeded data is recognizable even if the in-memory id list is lost. Delete ONLY what you created; never touch pre-existing data.
 - **Deletes hit seeded ids only.** A delete/irreversible step in this skill targets exclusively ids you created *this run*. If a case appears to need deleting or mutating **pre-existing** data, that is outside this skill's remit — **stop and ask the user**; do not proceed on assumed permission. (This skill does not self-authorize destructive actions beyond its own seeded entities.)
 - **Personal data.** Local and test APIs often return real-looking personal data (emails, names). Never put it in output, memory, or artifacts — report **ids and statuses only**. If you observe it, note once that the API returns it and move on; do not reproduce values.
+  When saving a response body or page text as evidence, query the real personal values (names, emails) of the accounts in play and replace every string field that contains them. Match by value, not by key: owner, creator and assignee fields carry names too. Then `grep -c -F -f <values file>` the saved file and require 0.
 - **Credentials.** Never type passwords, never fill a password field, never read one from a file or a manager. Playwright's browser starts logged **out** — ask the user to log in once in its headed window, then continue. If a session expires mid-run, pause and ask; do not attempt to re-auth.
 - **Read-only on code.** This skill verifies; it does not edit source, commit, or push.
 
@@ -84,6 +85,8 @@ Run these in parallel:
 
 Produce a short **numbered case list** before touching the app: each case = a precondition to seed, an action to drive, and the expected evidence (toast text / network status / UI state). For anything you're unsure the diff intends, read the code — don't guess the expected outcome.
 
+Ask, together with the case list, whether PR screenshots are wanted (default yes when a PR will follow). Deciding later means re-seeding and re-running every case just to capture them.
+
 ### Step 2 — Start the Playwright browser
 
 See `references/playwright-mcp.md` for the exact call sequence, the tool map, and the auth story. In short:
@@ -102,7 +105,8 @@ The reliable loop:
 2. **Seed the precondition** via API `req(...)` — create the entities this case needs; record their ids in your cleanup list. For a **concurrency race**, seed the entity, open its edit UI, then delete it via API mid-flow so the subsequent save/confirm hits the now-gone entity (this is how you reproduce "already deleted elsewhere" in a single tab — no second tab needed, which is more robust).
 3. **Drive the real UI** through the DOM: `.click()` the real buttons/checkboxes, set inputs with the native setter. Confirm the drawer/modal opened by reading the DOM (find the confirm input / submit button), not by eyeballing a screenshot.
 4. **Read back the evidence**: the recorder's captured toast text, whether the modal/drawer is still open (query for its element), whether the list refreshed (count), and the network evidence — `browser_network_requests` for the list, then `browser_network_request` on the matching entry to read **the response body of the request the UI actually fired**. That last part matters: a bulk endpoint's per-item statuses can be quoted from the observed request itself, rather than only corroborated by a separate `req()` call. The toast + UI state remain the direct proof the frontend branched correctly; the body is why.
-5. **Screenshot the decisive moment (if the user wants PR evidence).** Ask up front whether screenshots are wanted; if yes, capture at the moment the evidence is visible — the toast on screen, the modal still open.
+5. **Screenshot the decisive moment (if the user said yes in Step 1).** Capture at the moment the evidence is visible — the toast on screen, the modal still open.
+   - Mask personal data first: replace every visible real name or email in the DOM (text nodes, `<option>` text, `title` attributes) with a label such as `QA Member A (user 1)`, check that `document.body.innerText` no longer contains it, and capture the element (`target`) rather than the full page. Say in the PR caption that names were masked.
    - `browser_take_screenshot {filename: "<case>.png", scale: "css"}` writes a real file to the cwd (or `.playwright-mcp/`); `mv` it into `{qa_out_dir}/live-verify/<slug>/`. `browser_resize` first if the layout needs a sane width.
    - The verification and the screenshot happen in the *same* Playwright browser, so a transient toast fired by your driving IS visible to the screenshot. Still fire the shot immediately after the confirming click; toasts auto-hide in seconds. If you missed it, re-run the case rather than shipping a shot without the toast.
    Name files by case (`all-gone-danger.png`, `mixed-warning.png`) so they're self-describing in the PR.
@@ -141,7 +145,9 @@ Present the evidence table and a one-line verdict per bug/flow. Structure:
 | mixed → warning with count | *(drag `mixed-warning.png` here)* |
 ```
 
-Also check the screenshots before handing them over: **no personal data visible** (real names/emails in table rows count) — if a shot shows personal data, either crop it or re-run the case against seeded `QA-LV-` entities only.
+Give the absolute folder path and an `open <absolute path>` command, and write the screenshot section with `<!-- drag <file> here -->` placeholders straight into the PR body with `gh pr edit --body-file`, so the user only has to drag. After they save, read the body back with `gh pr view` and confirm each placeholder now has a `user-attachments` image.
+
+Also check the screenshots before handing them over: **no personal data visible** (real names/emails in table rows count) — if a shot shows personal data, mask it in the DOM (Step 3.5) and retake, or re-run the case against seeded `QA-LV-` entities only.
 
 Then STOP — report only; do not change code or open PRs. If a case FAILED, describe the exact observed vs expected and where in the diff the gap is; let the user decide the fix.
 
