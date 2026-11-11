@@ -354,6 +354,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
     "code-grill",
     "repo-audit",
     "code-debt",
+    "comment-trim",
     "leak-check"
    ]
   },
@@ -379,6 +380,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "skills": [
     "gg-explain",
     "irl-explain",
+    "plain-explain",
     "demo-guide"
    ]
   },
@@ -503,6 +505,24 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "agy_path": "antigravity/ai-toolbox/skills/code-grill/SKILL.md"
   },
   {
+   "name": "comment-trim",
+   "description": "Review the code comments a branch adds and cut the bloat: delete comments that restate the code, narrate the change ('added X', 'now uses Y'), chat at the reader, banner a short block or leave code commented out; shorten a multi-line 'why' to one line that keeps the reason; flag comments that contradict the code. Learns the house style first (project rules, doc-comment linters, the density of the surrounding code), never touches tool directives, debt markers, license headers or required doc tags, and judges only lines the branch adds. Shows a numbered table, then edits only the rows the user approves and checks that no code line changed. Use whenever the user asks to trim, shorten, clean up or review the comments in a diff, says the comments are bloated, too long, too many or 'AI-sounding', or wants the 'comment only the why' rule applied before a PR.",
+   "summary": "Review the code comments a branch adds and cut the bloat: delete comments that restate the code, narrate the change ('added X', 'now uses Y'), chat at the reader, banner a short block or leave code commented out; shorten a multi-line 'why' to one line that keeps the reason; flag comments that contradict the code.",
+   "user_only": false,
+   "tools": [
+    "Bash",
+    "Read",
+    "Edit",
+    "Glob",
+    "Grep"
+   ],
+   "writes": true,
+   "uses_agents": false,
+   "extras": [],
+   "path": "claude/skills/comment-trim/SKILL.md",
+   "agy_path": "antigravity/ai-toolbox/skills/comment-trim/SKILL.md"
+  },
+  {
    "name": "demo-guide",
    "description": "Write a demo guide for presenting a change — audience and goal, environment choice (local branch vs a deployed environment, with the reason), personas by role, setup steps and data (via /test-data or the UI), a timed script table (say / do / show / if it fails), wow moments, known gaps said before someone asks, cleanup, and likely questions with prepared answers drawn from the PBI's open questions and review threads. Writes {qa_out_dir}/<slug>/demo-guide.md. Use whenever the user has to demo, present or walk stakeholders through a feature, prepare for sprint review, \"show this to the PO\", or wants a script and Q&A for a feature presentation.",
    "summary": "Write a demo guide for presenting a change — audience and goal, environment choice (local branch vs a deployed environment, with the reason), personas by role, setup steps and data (via /test-data or the UI), a timed script table (say / do / show / if it fails), wow moments, known gaps said before someone asks, cleanup, and likely questions with prepared answers drawn from the PBI's open questions and review threads.",
@@ -602,7 +622,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   },
   {
    "name": "gg-explain",
-   "description": "Explain any technical term, concept, bug, PR, error, or code change in short bullet points built on the game mechanic that maps closest to it (Pokémon, MMOs, MOBAs, Minecraft, roguelikes — chosen by fit, and named when it helps) — offering three candidate mappings first, the closest marked as recommended, so the user picks the framing that will actually click — and closing gaming-framed answers with one plain \"Straight version\" line that uses the real terminology. Use this whenever the user asks for a simple, plain, or quick explanation — \"what is X\", \"in simple terms\", \"eli5\", \"what does this mean\", \"dumb it down\", \"explain this bug/PR/fix to me\" — even when they don't mention games; gaming framing is this user's preferred explanation style. Definitely use it when they say \"gaming terms\", \"like a game\", or \"/gg-explain\". Skip the gaming frame (plain short bullets only) when they say \"serious\", when they want no analogy at all, or when the text is destined for someone else (a PR description, a doc, a message to a colleague). If they want an analogy but not a gaming one — \"no gaming\", \"a real-life example\" — that is the sibling skill `irl-explain`, not this one.",
+   "description": "Explain any technical term, concept, bug, PR, error, or code change in short bullet points built on the game mechanic that maps closest to it (Pokémon, MMOs, MOBAs, Minecraft, roguelikes — chosen by fit, and named when it helps) — offering three candidate mappings first, the closest marked as recommended, so the user picks the framing that will actually click — and closing gaming-framed answers with one plain \"Straight version\" line that uses the real terminology. Use it only when the user asks for the gaming frame — \"gaming terms\", \"like a game\", or \"/gg-explain\". A request to explain with no analogy asked for — \"what is X\", \"in simple terms\", \"eli5\", \"explain this bug/PR/fix\" — is the sibling skill `plain-explain`, the default explanation skill, and so is text destined for someone else (a PR description, a doc, a message to a colleague). Skip the gaming frame (plain short bullets only) when they say \"serious\" after invoking this skill. If they want an analogy but not a gaming one — \"no gaming\", \"a real-life example\" — that is the sibling skill `irl-explain`, not this one.",
    "summary": "Explain any technical term, concept, bug, PR, error, or code change in short bullet points built on the game mechanic that maps closest to it (Pokémon, MMOs, MOBAs, Minecraft, roguelikes — chosen by fit, and named when it helps) — offering three candidate mappings first, the closest marked as recommended, so the user picks the framing that will actually click — and closing gaming-framed answers with one plain \"Straight version\" line that uses the real terminology.",
    "user_only": false,
    "tools": null,
@@ -694,7 +714,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   },
   {
    "name": "irl-explain",
-   "description": "Explain a technical term, concept, bug, PR, error, or code change through an everyday real-life scenario — supermarket, cafe, post office, bank, clinic, commute — instead of a game, and offer three candidate scenarios BEFORE explaining, each with a one-line summary of how it would carry the mechanism, so the user picks the framing that will actually click. Use when the user invokes /irl-explain, or asks for a real-life, everyday, or non-gaming analogy: \"no gaming\", \"explain it with a real life example\", \"not a game analogy\", \"use something normal\", \"give me a different scenario\". This is the non-gaming sibling of gg-explain — hand off to it when the user wants an analogy but not a game one. If they want no analogy at all (plain bullets, or text destined for a colleague), that is gg-explain's opt-out path, not this skill.",
+   "description": "Explain a technical term, concept, bug, PR, error, or code change through an everyday real-life scenario — supermarket, cafe, post office, bank, clinic, commute — instead of a game, and offer three candidate scenarios BEFORE explaining, each with a one-line summary of how it would carry the mechanism, so the user picks the framing that will actually click. Use when the user invokes /irl-explain, or asks for a real-life, everyday, or non-gaming analogy: \"no gaming\", \"explain it with a real life example\", \"not a game analogy\", \"use something normal\", \"give me a different scenario\". This is the non-gaming sibling of gg-explain — hand off to it when the user wants an analogy but not a game one. If they want no analogy at all, or the text is for a colleague, that is the sibling skill `plain-explain`, not this skill.",
    "summary": "Explain a technical term, concept, bug, PR, error, or code change through an everyday real-life scenario — supermarket, cafe, post office, bank, clinic, commute — instead of a game, and offer three candidate scenarios BEFORE explaining, each with a one-line summary of how it would carry the mechanism, so the user picks the framing that will actually click.",
    "user_only": false,
    "tools": null,
@@ -813,6 +833,18 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
    "extras": [],
    "path": "claude/skills/pbi-gen-test-doc/SKILL.md",
    "agy_path": "antigravity/ai-toolbox/skills/pbi-gen-test-doc/SKILL.md"
+  },
+  {
+   "name": "plain-explain",
+   "description": "Explain a technical thing — a term, a bug, a PR, an error, an investigation tab, a design decision, a Slack thread — in plain language a non-technical reader can act on: a PO, a manager, support, a designer, or the user when they want the plain version. Headed sections that follow the source's argument (The question / What we found / What it means / Things to watch / Not settled yet), short prose lines, every code name replaced by what the thing does, numbers turned into rounded proportions in words, and every hedge and open item kept. This is the default explanation skill: use it whenever the user asks for an explanation and does not ask for an analogy — \"what is X\", \"explain this\", \"in plain English\", \"in simple terms\", \"eli5\", \"what does this mean\", \"explain this bug/PR/fix\", \"summarize this for the PO\", \"for my manager\", \"for non-devs\" — or invokes /plain-explain. Only a request for the gaming frame (\"gaming terms\", \"like a game\", /gg-explain) goes to gg-explain, and only a request for a real-life scenario (\"real-life example\", \"no gaming\", /irl-explain) goes to irl-explain.",
+   "summary": "Explain a technical thing — a term, a bug, a PR, an error, an investigation tab, a design decision, a Slack thread — in plain language a non-technical reader can act on: a PO, a manager, support, a designer, or the user when they want the plain version.",
+   "user_only": false,
+   "tools": null,
+   "writes": true,
+   "uses_agents": false,
+   "extras": [],
+   "path": "claude/skills/plain-explain/SKILL.md",
+   "agy_path": "antigravity/ai-toolbox/skills/plain-explain/SKILL.md"
   },
   {
    "name": "pr-comment-triage",
@@ -1152,7 +1184,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   },
   {
    "name": "live-verifier",
-   "description": "Live-tests UI changes against the running app in a browser to prove flows work in the real DOM. Produces a pass/fail evidence table with recorded toasts, network responses, and UI state without saving screenshots. Used in Tier 1 and Tier 2 after parallel review/validate.",
+   "description": "Live-tests UI changes against the running app in a browser to prove flows work in the real DOM. Produces a pass/fail evidence table with recorded toasts, network responses, and UI state; saves masked screenshots only when the handoff asks for PR evidence. Used in Tier 1 and Tier 2 after parallel review/validate.",
    "model": "sonnet",
    "used_by": [
     "project-manager"
