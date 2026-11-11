@@ -207,7 +207,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
 </footer>
 
 <script type="application/json" id="data">{
- "version": "0.1.0",
+ "version": "",
  "repo": "https://github.com/James2898/ai-toolbox",
  "license": "MIT",
  "changelog": {
@@ -1090,7 +1090,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
     return parent;
   }
 
-  $("version").textContent = "v" + D.version;
+  if (D.version) $("version").textContent = "v" + D.version; else $("version").remove();
   $("repo-link").href = D.repo;
   $("source-link").href = D.repo + "/blob/main/CHANGELOG.md";
   $("license").textContent = D.license + " license.";

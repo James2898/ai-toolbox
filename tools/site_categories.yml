@@ -38,6 +38,7 @@ Code health:
   - code-grill
   - repo-audit
   - code-debt
+  - comment-trim
   - leak-check
 
 Git:
@@ -56,5 +57,6 @@ Explain & demo:
   - irl-explain
   - demo-guide
 
-Writing:
+Documentation & writing:
+  - doc-grill
   - humanizer

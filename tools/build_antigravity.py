@@ -38,6 +38,7 @@ WRITE_AGENTS = {
     "pbi-test-doc-auditor",
     "pbi-test-doc-generator",
     "pbi-test-doc-writer",
+    "live-verifier",
 }
 SEARCH_AGENTS = {
     "codebase-explorer",
@@ -142,7 +143,9 @@ def render(fields, body, original, kind):
         agy_model = MODEL_MAP.get(fields.get("model", "").lower(), "inherit")
         model_line = f"model: {agy_model}\n"
         if fields["name"] in WRITE_AGENTS:
-            tools_block = "tools:\n" + "".join(f"  - {t}\n" for t in WRITE_TOOLS)
+            tools = list(WRITE_TOOLS)
+            mcp_line = "inheritMcp: true\n" if fields["name"] == "live-verifier" else ""
+            tools_block = f"{mcp_line}tools:\n" + "".join(f"  - {t}\n" for t in tools)
         elif fields["name"] in SEARCH_AGENTS:
             tools_block = "tools:\n" + "".join(f"  - {t}\n" for t in SEARCH_TOOLS)
         elif fields["name"] in PROMPT_AGENTS:

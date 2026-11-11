@@ -90,5 +90,6 @@ Keep the verbatim section truly verbatim. The analysis is yours; the PBI is thei
 - Verbatim PBI section must not be altered, summarized, or "cleaned up."
 - Never overwrite an existing PBI hardcopy without asking.
 - Codebase-Aware Notes must cite only paths that exist — verify, don't guess.
+- Use repo-relative backtick paths (e.g. `` `src/app/library/[id]/page.tsx` ``) inside the saved PBI markdown file — never embed `file:///Users/...` or `file:///C:/Users/...` local filesystem URIs into tracked repository docs.
 - Do not commit or push the file unless the user asks.
 - Acceptance criteria must be testable; vague aspirational statements belong in Ambiguities, not Acceptance Criteria.

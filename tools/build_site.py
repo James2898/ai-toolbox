@@ -183,6 +183,8 @@ def read_rules():
         for line in path.read_text(encoding="utf-8").splitlines():
             if line.startswith("# ") and title == path.stem:
                 title = line[2:].strip()
+            elif line.strip().startswith("<!--") or line.strip().endswith("-->"):
+                continue
             elif line.strip() and not line.startswith("#"):
                 para.append(re.sub(r"^>\s?", "", line).strip())
             elif para:
@@ -304,7 +306,7 @@ def build_data():
         del s["_body"]
     return {
         "name": plugin["name"],
-        "version": plugin["version"],
+        "version": plugin.get("version", ""),
         "description": plugin["description"],
         "license": plugin.get("license", ""),
         "repo": repo,
@@ -312,7 +314,7 @@ def build_data():
             {"id": "tab-claude", "steps": [
                 {"note": "Add this repository as a plugin marketplace, then install the plugin:",
                  "commands": [f"claude plugin marketplace add {slug}", f"claude plugin install {plugin['name']}@{plugin['name']}"]},
-                {"note": "Then point the skills at your project with a profile (see Project profile below)."},
+                {"note": "Configure repository settings in a profile (see Project profile below)."},
             ]},
             {"id": "tab-agy", "steps": [
                 {"note": "Install from the repository:",
