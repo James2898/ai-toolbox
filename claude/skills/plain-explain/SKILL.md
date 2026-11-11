@@ -26,15 +26,15 @@ The register is non-technical. The reader knows what the product does and what t
 
 2. **Headed sections that follow the source's argument.** Use the headings the source needs, in this order, and skip the ones it does not: **The question** · **What we found** · **What it means** (for the fix, for the release, for the customer, whichever the source decides) · **Things to watch** · **One extra finding** · **Not settled yet**. The order and the base set are fixed so summaries read alike; the wording bends to the source ("What it means for the fix", "Two things to watch when doing that"). A source with no risks has no "Things to watch". A source with open items always ends on "Not settled yet", because a reader will act on the summary as if it were final unless told otherwise.
 
-3. **Short prose lines, not bullets.** The reader reads; a developer scans. One idea per sentence, about twenty words, a verb in each. No parentheses, no dash asides, no semicolons, no arrows: an aside is its own sentence. A list only where the source enumerates (the four steps of the export).
+3. **Short prose lines, not bullets.** The reader reads; a developer scans. One idea per sentence, about twenty words, a verb in each. No parentheses, no dash asides, no semicolons, no arrows: an aside is its own sentence. A list only where the source enumerates (the four steps of a search).
 
-4. **Every technical noun becomes what it does.** File names, function names, table and column names, SQL words, config flags, environment names, units, tool names, HTTP codes: none survive. "the step that loads all the records", "the file's character encoding", "an employee's department history", "the browser showed an error and no file arrived". Test each noun: would someone who has never seen the repository know what it is? When a term has no plain substitute, keep it once and say what it is in the same sentence.
+4. **Every technical noun becomes what it does.** File names, function names, table and column names, SQL words, config flags, environment names, units, tool names, HTTP codes: none survive. "the step that finds the matching items", "the item's tags", "the page drew twice", "the page showed an error instead of results". Test each noun: would someone who has never seen the repository know what it is? When a term has no plain substitute, keep it once and say what it is in the same sentence.
 
-5. **Numbers become rounded proportions in words,** and only where they change what the reader does. "Almost three quarters of the memory", "about one seventh". Raw measurements, counts and units go: the reader cannot judge whether 2,519 MiB is a lot, but "three quarters of the total" they can. Keep a number the reader acts on, rounded and in words: a one-minute limit, a date, a build estimate ("about three days"), a run time ("under half an hour"), a threshold ("fewer than 500 employees"). The test is who the number is for: a figure the reader decides on stays, a figure that describes the system's insides becomes a proportion or goes.
+5. **Numbers become rounded proportions in words,** and only where they change what the reader does. "About four fifths of the time", "about one tenth". Raw measurements, counts and units go: the reader cannot judge whether 1,840 ms is a lot, but "four fifths of the total" they can. Keep a number the reader acts on, rounded and in words: a one-minute limit, a date, a build estimate ("about three days"), a run time ("under half an hour"), a threshold ("fewer than 500 employees"). The test is who the number is for: a figure the reader decides on stays, a figure that describes the system's insides becomes a proportion or goes.
 
 6. **Hedges survive with their full weight.** "Not verified", "not checked on the live system", "in rare cases", "a lower bound", "expected to". The reader will treat anything stated flatly as settled, so what is unsettled is said as plainly as what is settled, and never upgraded: "expected" does not become "will", "could" does not become "does".
 
-7. **Consequence before mechanism, and often instead of it.** What the customer or the business sees comes first: the browser showed an error and no file arrived. How it happened (a gateway timeout) comes second, and only if the reader needs it to act.
+7. **Consequence before mechanism, and often instead of it.** What the customer or the business sees comes first: the page showed an error instead of results. How it happened (a timed-out database query) comes second, and only if the reader needs it to act.
 
 8. **Nothing added.** No facts, no recommendation the source does not make, no reassurance, no "this should be fine". Where the source leaves a thing unexplained, the summary says it is unexplained, under "Not settled yet". Where the source gives one number and you are tempted to give the ratio, check the arithmetic against the source before writing it.
 
@@ -51,7 +51,7 @@ The register is non-technical. The reader knows what the product does and what t
 - **Single term or error message** ("what does a 504 mean") — two to four sentences, no headings: what it is, when it happens, what it means for them.
 - **Decision or proposal** — **The choice** · **What each option costs** · **What is recommended, and why** · **Not decided yet**.
 - **Thread or meeting notes** — **What was asked** · **What was agreed** · **Who does what next** · **Not settled yet**.
-- **Follow-up** ("why does loading in batches help?") — same register, same rules, whoever asks.
+- **Follow-up** ("why does loading the tags in one go help?") — same register, same rules, whoever asks.
 
 ## When an analogy is asked for
 
@@ -66,33 +66,33 @@ Hand off instead of writing: a game wanted ("gaming terms", "like a game") → `
 
 ## Example
 
-**Input:** `/plain-explain` the "Memory breakdown measurement" tab *(an investigation tab: a table of memory at five checkpoints of a CSV export, a second table from the real export page, a decision rule, and two follow-up checks)*
+**Input:** `/plain-explain` the "Search timing breakdown" tab *(an investigation tab: timings at four checkpoints of a search request, a second table from the real page in a browser, a decision rule, and two follow-up checks)*
 
 **Output:**
 
-Plain-language summary of the "Memory breakdown measurement" tab:
+Plain-language summary of the "Search timing breakdown" tab:
 
 **The question**
-When a large customer exports their full timesheet history, the server uses far too much memory. Before fixing it, we wanted to know which step of the export is responsible, so we only rewrite that step.
+For accounts with many tagged items, the search page takes several seconds to appear. Before fixing it, we wanted to know which step of the search takes the time, so we only rewrite that step.
 
 **What we found**
-The export works in four steps: load all the records, build the output lines, assemble the file, convert the file's character encoding.
-Almost three quarters of the memory is used by the first step, loading all the records at once. The other three steps are small by comparison.
-We measured it two ways, once with a test script and once by clicking the real Download button in a browser. Both gave the same picture.
+A search runs in four steps: read the query, find the matching items, load each item's tags, draw the page.
+About four fifths of the time goes to the third step, which loads the tags one item at a time. The other three steps are quick by comparison.
+We measured it two ways, once with a timing tool on a developer machine and once by searching on the real page in a browser. Both gave the same picture.
 
 **What it means for the fix**
-The cheap fix, changing only how the output lines are built, would save about one seventh of the memory. That is not enough.
-The fix has to change the first step: load the records in small batches, write them out, and move on, instead of holding everything at once.
+The cheap fix, remembering recent tag lookups, would save about one tenth of the time, and only for repeated searches. That is not enough.
+The fix has to change the third step: load the tags for all the matching items in one go instead of one item at a time.
 
 **Two things to watch when doing that**
-Records entered at exactly the same time may come out in a slightly different order than today. The test data has no such records, so a new test case is needed.
-In rare cases an employee's department history could make a record appear twice. The batch approach must guard against that.
+Items with no tags showed an empty placeholder before. The new step must still show it rather than hiding those items.
+Tags may come out in a different order than today for items that share a tag. The test data has no such items, so a new test case is needed.
 
 **One extra finding**
-The Excel version of the same export took longer than the local server's one-minute limit, so the browser showed an error and no file arrived. The limit on the live system has not been checked.
+On a phone, the page draws twice, once before the tags arrive and once after. That doubles the drawing step on small screens. The cause was not investigated.
 
 **Not settled yet**
-Two lookups in the export currently need the full list of records. They would have to be reworked to run per batch.
+The "related items" box on the same page also loads one item at a time. It is outside this change and would need the same treatment.
 
 ---
 
