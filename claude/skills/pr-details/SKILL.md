@@ -174,6 +174,8 @@ Print the complete PR title and body using this exact wrapper format so the user
 
 ## STEP 6: Offer to create the PR via gh
 
+If a PR for this branch already exists, update it instead of creating one: fetch the live body with `gh pr view <n> --json body --jq .body`, edit that copy, then run `gh pr edit <n> --body-file <file>`. Never rebuild the body from an earlier local copy: people add images, notes and checklist ticks on the web, and other sessions edit it too.
+
 If the user's request already asked to open the PR, skip the question and create it. Otherwise use `AskUserQuestion`:
 
 > "Create the PR now via `gh pr create`? Target branch: `{base}`. (yes / no)"
