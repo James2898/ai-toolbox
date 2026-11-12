@@ -92,6 +92,7 @@ Output the complete table and item descriptions as regular markdown text, then a
 
 - Memory: write or update the entry and its index line.
 - Skills, agents, rules, hooks, permissions: show the diff first and apply after the user confirms that diff; these change how every future session behaves.
+  Right before showing a diff, re-read the target file and run `git -C <repo> status --short`, `git -C <repo> branch --show-current` and `git -C <repo> log -1 --format='%h %cr' -- <file>`. A forked or parallel session may already have made the change, or the repo may be on a branch where it does not apply. If so, report that instead of showing the diff.
 - After applying, run the repo's leak check in every repo you edited (the `leak-check` skill; in the toolbox, `python3 -I tools/leak_check.py`). Report findings by file:line only, reword, and re-run until it exits 0 for the files you touched.
 - Report what was applied, and which items were left for later.
 
