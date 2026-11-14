@@ -174,6 +174,7 @@ For **each** comment, do real research before writing its row. Never work from t
 
 - Tier each finding: **✅ rule-backed** (a PR comment or a `.claude/rules/` line you can cite) · **🟡 inferred** (analogy to a rule, labeled as inference) · **🟢 taste** (your call only). Don't dress taste as rule-backed.
 - The comments set the agenda — you're triaging *their* findings, not manufacturing new ones. Add a net-new finding only if the validator surfaced it or it's a real blocker; put those in a separate "Net-new (not yet commented)" mini-section, clearly marked.
+- **Verify a validator's net-new finding before proposing action on it.** Trace its trigger path in the code, and in the library source when the claim rests on library behavior. If the path is unreachable, drop it. If only a live check can settle it, list it as `unverified — needs <check>` and offer the check; don't put it in the recommended fixes.
 - **Default to closing non-blocking findings now** when the deferral rationale is "mock can't fail" / "real API lands later" / "dead code until a later ticket" — this user prefers shipping the whole thing over a long tail of 🟡. **Counter-trigger:** if closing needs architectural change outside task scope, that's creep — keep deferring.
 
 ---
@@ -289,6 +290,7 @@ The user drives everything past the table. Handle each request with its own scop
 - **"Draft the reply to C1 / C3"** → produce a **paste-ready ```markdown fenced block** (verdict up front — applied / partially applied / declining — then 1–3 bullets with reasoning; cite the PBI Out-of-Scope verbatim when that's the decline basis). Keep it concise. Do **not** post it — the user pastes it, or explicitly says "post it".
 - **"Post the reply to C1"** → posting is a separate, high-consequence action (public, attributed to the user). Confirm the exact target thread, then post to **that thread only** via `gh api .../replies`. "Post to C1" never covers C2.
 - **Resolved + fixed Devin comments** worth a durable lesson → offer to route them to `@debug-memory` once (batched), per the peer-review pattern. Don't auto-run it.
+- **Re-validating after fixes** → when you run the validator again after applying review fixes, list in its brief which reviewer comment each edit answers. Otherwise it reports the requested edits as scope creep.
 
 Never generalize one approval to the next comment. Code-fix permission ≠ reply permission ≠ post permission.
 
