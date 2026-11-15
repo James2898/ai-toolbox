@@ -22,6 +22,7 @@ This skill reads the project profile (see the toolbox README): `AI_TOOLBOX_PROFI
 | `{topic_bases}` | `git.topic_bases` | none: always use the PR's own base |
 | `{frontend_dir}` | `project.frontend_dir` | the directory holding `package.json` (`.` in a single-package repo); skip if none |
 | `{frontend_check}` | `commands.frontend_check` | from `package.json` scripts |
+| `{frontend_test_in_worktree}` | `commands.frontend_test_in_worktree` | the frontend's own test binary from `{frontend_dir}/node_modules/.bin`, with explicit config and root paths into `$WT`; never `npx` |
 | `{backend_test}` | `commands.backend_test` | from the build files (`go.mod`, `pom.xml`, `pyproject.toml`, …) |
 | `{dependent_suites}` | `commands.dependent_suites` | find the importers of each changed package and run their suites too |
 | `{comment_labels}` | `review.comment_labels` | no label prefix |
@@ -257,6 +258,7 @@ This is the core deliverable. For **each** comment, do real research before writ
 3. **Cross-reference** the validator findings (Step 2a) when they land — if the validator independently flagged the same spot, say so; if it contradicts the comment, surface that.
 4. **Cross-reference the PBI** (Step 0) — if the comment touches behavior tied to an acceptance criterion, note whether the criterion is still satisfied after the change. Flag if a comment's resolution breaks a criterion or drifts outside the PBI's scope.
 5. **Form an independent verdict**: Agree / Partially agree / Disagree, with the technical reason and a `file:line` citation.
+6. **Duplicate server state.** When the PR adds a second read of state another component already holds (editable flags, approval status, permissions), list what refreshes each copy and walk every mutation reachable from the same screen. If one copy refreshes and the other does not, that is a correctness finding, not a performance note.
 
 Keep the table cell to a tight verdict + reason. If a comment needs deep analysis, put a short verdict in the table and write the full reasoning in a **per-comment Research Appendix** section below the table, linked from the table (e.g. `see §C3`). The user explicitly wants in-depth research, not one-line hand-waves — err toward the appendix for anything non-trivial.
 
@@ -273,6 +275,8 @@ Once the foreground comment work is done, retrieve the background validator agen
 If the validator is still running when comments are done, wait for it before writing the final report.
 
 > **The validator is diff-scoped and runs no tests.** Its verdict is never evidence that the suites pass. When the PR changes behaviour other packages depend on, run the affected suites yourself inside `$WT` (`{backend_test}` / `{frontend_check}`) — the changed package **and** its dependants (`{dependent_suites}`) — and record the result in the Validator Audit section. If they cannot run in the worktree, say so rather than implying coverage.
+>
+> Run frontend suites with `{frontend_test_in_worktree}`. Do not use `npx <runner>`: it can download a different runner version and resolves its config from the shell's current directory, which may not be `$WT`.
 
 ---
 
@@ -399,13 +403,23 @@ Note any **scope creep**: changes in the PR that fall outside the PBI's stated s
 
 The report itself is never posted. When the user then asks to "draft the comments", produce paste-ready comment text under these rules:
 
+- **Check every draft before showing it (mandatory, not on request).** Under each draft, show one "Checks:" line covering:
+  - (a) the target line is in `git diff origin/$BASE...<head>` for that file;
+  - (b) the cited rule exists in the committed rules on the PR base (`git show origin/$BASE:<rule path>`);
+  - (c) reviewer-policy memories for the touched area, read whole (a correction block outranks the headline);
+  - (d) the state the finding describes can actually happen: trace what can change its inputs while the code is mounted (a validator finding is a lead to verify, not a second opinion);
+  - (e) the PR body and the spec or SDD docs do not already answer it;
+  - (f) comments re-fetched, so the point is not already raised.
+  A draft that fails (b), (c) or (d) is withdrawn or downgraded before the user sees it.
+- **Cite only what teammates can open:** paths in the PR's head or base tree, PR and commit numbers, and URLs. Never cite `{pbi_dir}`, the report folder, memory files, or any path listed in `.git/info/exclude`.
+- **Humanize before showing:** pass each draft body through the `humanizer` skill in embedded mode. Keep the label prefix and every code span unchanged.
 - **Own findings only.** Draft comments solely for issues the reviewer flagged independently (the "My Own Findings" section). Do **not** draft replies to Devin/bot threads or restate other reviewers' points — this is a teammate's PR, and those threads are the author's to handle. (This differs from `pr-comment-triage`, which is for the user's own PRs.)
 - **Inline comments.** Every drafted comment anchors to a `file:line`. When `{inline_only}` is true, never draft a summary/overall review comment.
 - **Label prefix** on every comment from `{comment_labels}` (e.g. `[MUST]` / `[IMO]` / `[nits]` / `[ASK]`), per the repo's PR-template semantics. No labels configured → no prefix.
 - **Tone: short, factual, no emotion, no praise.** State the finding, the evidence, the ask. A few sentences max.
 - **In-depth backing required.** Before drafting a comment that cites a convention against the PR, verify precedent in the repo: grep for the pattern the comment relies on and classify **every** match — the full distribution, not the first sibling found (on a past review a "use the sibling's safe form" comment died on the full sweep: the criticized form was the 11-of-13 majority). When existing code contradicts the convention, **date the precedent with `git log` vs. the convention's date** — the newer one governs new code, and the comment should acknowledge the older precedent rather than pretend the repo is clean. A comment that flags the house-majority pattern is noise — withdraw it.
 - **Convention provenance check.** A rule that exists only in the reviewer's personal memory/feedback (not in `.claude/rules/`, the project's documented guidelines, or the PR template) is a personal practice, not a team rule — it cannot back a blocking label (e.g. `[MUST]`) on a teammate's PR. Verify where the rule is codified before citing it.
-- The user posts the comments themselves; this skill never posts to GitHub.
+- The user posts the comments themselves; this skill never posts to GitHub. **When the user says "post":** re-check the PR head SHA, write the body to a file in the work directory, and print one command for the user to run: `gh api repos/<owner>/<repo>/pulls/<N>/comments -X POST -F body=@<file> -f commit_id=<head> -f path=<path> -F line=<n> -f side=RIGHT`. Do not attempt the POST from the session.
 
 ---
 

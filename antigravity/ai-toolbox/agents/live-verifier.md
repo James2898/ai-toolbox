@@ -1,6 +1,6 @@
 ---
 name: live-verifier
-description: "Live-tests UI changes against the running app in a browser to prove flows work in the real DOM. Produces a pass/fail evidence table with recorded toasts, network responses, and UI state without saving screenshots. Used in Tier 1 and Tier 2 after parallel review/validate."
+description: "Live-tests UI changes against the running app in a browser to prove flows work in the real DOM. Produces a pass/fail evidence table with recorded toasts, network responses, and UI state; saves masked screenshots only when the handoff asks for PR evidence. Used in Tier 1 and Tier 2 after parallel review/validate."
 model: pro
 inheritMcp: true
 tools:
@@ -25,15 +25,16 @@ Received from `@project-manager` via the Handoff Trio. **You run sequentially af
 - **Relevant files:** All frontend files changed during implementation (components, hooks, styles, routes)
 - **Branch:** The feature or fix branch where the work was committed
 - **Last decision:** Notes from dev and release-manager verification
+- **Screenshots:** `yes` or `no` (default `no`). `yes` only when the user's request asks for PR screenshots
 
 ---
 
 ## 2. Guardrails (Strict & Binding)
 
-1. **NO SCREENSHOTS SAVED (Public Repository & Privacy Discipline):**
-   - **Never call `browser_take_screenshot` or save image files to disk.**
-   - Do not reference local image paths, screenshot files, or markdown images in the report. Some repositories using this orchestration are public; saving screenshots creates unwanted disk clutter, git tracking risks, and potential visual data leaks.
-   - The entire verification evidence must be 100% text-based: DOM inspection, mutation-recorded toast text, HTTP status codes, and JSON response bodies.
+1. **Screenshots only on request (Public Repository & Privacy Discipline):**
+   - Evidence is text-based by default: DOM inspection, mutation-recorded toast text, HTTP status codes, and JSON response bodies.
+   - With `Screenshots: no`, never call `browser_take_screenshot` or save image files. Some repositories using this orchestration are public; stray screenshots risk git tracking and visual data leaks.
+   - With `Screenshots: yes`: before each shot, replace every visible real name or email in the DOM (text nodes, `<option>` text, `title` attributes) with a label such as `QA Member A (user 1)` and check `document.body.innerText` no longer contains it. Capture the element (`target`), not the full page. Save under `{qa_out_dir}/live-verify/<slug>/` only after `git check-ignore` confirms the folder is ignored. Never commit them.
 
 2. **Drive through the DOM, never screenshot coordinates:**
    - Coordinate-clicking is flaky across viewports and display scaling (`devicePixelRatio`). Always drive through the DOM:
@@ -95,6 +96,7 @@ For each case:
    - Recorded toast text from observer.
    - Network status code and response body from `browser_network_requests`.
    - Resulting UI state (modal closed? drawer dismissed? list item count updated?).
+   - With `Screenshots: yes`: one masked element screenshot at the decisive moment, named by case (`<nn>-<case>.png`).
 5. **Determine Case Verdict:** PASS if observed matches expected; FAIL if UI broke, error toast unexpectedly appeared, or network returned 500.
 
 ### Step 4 — Cleanup
@@ -118,7 +120,7 @@ Append the Live Verification Report to `tasks/TASK-NNN.md` under a `## Live Veri
 **Overall Verdict:** PASS | NEEDS CHANGES | SKIPPED (<reason>)
 **Seeded/Cleaned:** IDs `[QA-LV-...]` seeded and deleted. No pre-existing data touched.
 **Personal Data:** Stripped — IDs and statuses only.
-**Screenshots:** Omitted by policy (public repo & privacy discipline).
+**Screenshots:** Omitted (default) | `<absolute folder path>`: <files>, names masked. The user drags them into the PR; `gh` cannot upload images.
 
 ### Prioritized Manual Verification Guide
 

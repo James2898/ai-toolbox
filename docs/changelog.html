@@ -218,6 +218,426 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   ],
   "releases": [
    {
+    "title": "2026-11-15",
+    "groups": [
+     {
+      "kind": "Added",
+      "items": [
+       [
+        {
+         "code": "plain-explain"
+        },
+        {
+         "t": " skill: explains technical terms, bugs, PRs, and decisions in plain language for non-technical readers (PO, manager, support) using structured sections (The question / What we found / What it means / Things to watch / Not settled yet), short prose lines, rounded proportions, and no code identifiers. ("
+        },
+        {
+         "t": "#32",
+         "href": "https://github.com/James2898/ai-toolbox/pull/32"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "t": "Catalog: registered "
+        },
+        {
+         "code": "plain-explain"
+        },
+        {
+         "t": " under the explainability category in the catalog site ("
+        },
+        {
+         "code": "docs/index.html"
+        },
+        {
+         "t": "). ("
+        },
+        {
+         "t": "#32",
+         "href": "https://github.com/James2898/ai-toolbox/pull/32"
+        },
+        {
+         "t": ")"
+        }
+       ]
+      ]
+     },
+     {
+      "kind": "Changed",
+      "items": [
+       [
+        {
+         "code": "gg-explain"
+        },
+        {
+         "t": " and "
+        },
+        {
+         "code": "irl-explain"
+        },
+        {
+         "t": ": route general or non-analogy explanation requests to "
+        },
+        {
+         "code": "plain-explain"
+        },
+        {
+         "t": " by default. ("
+        },
+        {
+         "t": "#32",
+         "href": "https://github.com/James2898/ai-toolbox/pull/32"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "live-verify"
+        },
+        {
+         "t": ": permits masked screenshots under "
+        },
+        {
+         "code": "{qa_out_dir}/live-verify/<slug>/"
+        },
+        {
+         "t": " for PR evidence while masking personal names, and delegates third-party sign-in flows to manual user interaction. ("
+        },
+        {
+         "t": "#28",
+         "href": "https://github.com/James2898/ai-toolbox/pull/28"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "retro"
+        },
+        {
+         "t": ": checks repository status, current branch, and the latest commit before presenting diffs to prevent applying stale or misplaced changes, and runs repository privacy/leak checks ("
+        },
+        {
+         "code": "tools/leak_check.py"
+        },
+        {
+         "t": ") over touched files before completion. ("
+        },
+        {
+         "t": "#28",
+         "href": "https://github.com/James2898/ai-toolbox/pull/28"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "t": "#30",
+         "href": "https://github.com/James2898/ai-toolbox/pull/30"
+        },
+        {
+         "t": ")"
+        }
+       ]
+      ]
+     },
+     {
+      "kind": "Fixed",
+      "items": [
+       [
+        {
+         "code": "pr-details"
+        },
+        {
+         "t": ": fetches and updates the live pull request body via "
+        },
+        {
+         "code": "gh pr view"
+        },
+        {
+         "t": " when a PR already exists instead of recreating or overwriting it from a local draft. ("
+        },
+        {
+         "t": "#30",
+         "href": "https://github.com/James2898/ai-toolbox/pull/30"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "t": "#33",
+         "href": "https://github.com/James2898/ai-toolbox/pull/33"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "pr-peer-review"
+        },
+        {
+         "t": ": validates all drafted comments against the codebase before presenting them to the reviewer. ("
+        },
+        {
+         "t": "#31",
+         "href": "https://github.com/James2898/ai-toolbox/pull/31"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "pr-comment-triage"
+        },
+        {
+         "t": ": passes review context to "
+        },
+        {
+         "code": "validator-agent"
+        },
+        {
+         "t": " and verifies net-new findings against sibling files. ("
+        },
+        {
+         "t": "#28",
+         "href": "https://github.com/James2898/ai-toolbox/pull/28"
+        },
+        {
+         "t": ")"
+        }
+       ]
+      ]
+     }
+    ]
+   },
+   {
+    "title": "2026-11-11",
+    "groups": [
+     {
+      "kind": "Added",
+      "items": [
+       [
+        {
+         "code": "doc-grill"
+        },
+        {
+         "t": " skill: interrogates technical documentation, READMEs, skills, agent definitions, and rules adversarially across seven evaluation families, with "
+        },
+        {
+         "code": "--diff"
+        },
+        {
+         "t": " for drift detection and "
+        },
+        {
+         "code": "--rounds"
+        },
+        {
+         "t": " for interactive review. ("
+        },
+        {
+         "t": "#23",
+         "href": "https://github.com/James2898/ai-toolbox/pull/23"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "t": "#25",
+         "href": "https://github.com/James2898/ai-toolbox/pull/25"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "comment-trim"
+        },
+        {
+         "t": " skill: reviews code comments added in a diff and removes narrative restatements, chat artifacts, and banners while shortening explanations to a single line. ("
+        },
+        {
+         "t": "#29",
+         "href": "https://github.com/James2898/ai-toolbox/pull/29"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "code": "live-verifier"
+        },
+        {
+         "t": " subagent: live browser-driven verification in Tier 1 and Tier 2 orchestration chains via Playwright MCP, with automatic worktree dependency linking and post-orchestration manual verification checklist. ("
+        },
+        {
+         "t": "#22",
+         "href": "https://github.com/James2898/ai-toolbox/pull/22"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "t": "#25",
+         "href": "https://github.com/James2898/ai-toolbox/pull/25"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "t": "#27",
+         "href": "https://github.com/James2898/ai-toolbox/pull/27"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "t": "Hooks: "
+        },
+        {
+         "code": "large-bash-write-guard"
+        },
+        {
+         "t": " blocks oversized file writes via Bash command string interpolation and redirects to the dedicated Write tool. ("
+        },
+        {
+         "t": "#26",
+         "href": "https://github.com/James2898/ai-toolbox/pull/26"
+        },
+        {
+         "t": ")"
+        }
+       ]
+      ]
+     },
+     {
+      "kind": "Changed",
+      "items": [
+       [
+        {
+         "code": "code-grill"
+        },
+        {
+         "t": ": standardized question outputs to use the 5-column Markdown table format matching "
+        },
+        {
+         "code": "design-grill"
+        },
+        {
+         "t": " and "
+        },
+        {
+         "code": "doc-grill"
+        },
+        {
+         "t": ". ("
+        },
+        {
+         "t": "#20",
+         "href": "https://github.com/James2898/ai-toolbox/pull/20"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "t": "#25",
+         "href": "https://github.com/James2898/ai-toolbox/pull/25"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "t": "Rules: documented Windows shell execution hygiene, subagent background task lifecycle constraints, Git worktree path resolution, and subagent session snapshotting. ("
+        },
+        {
+         "t": "#17",
+         "href": "https://github.com/James2898/ai-toolbox/pull/17"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "t": "#21",
+         "href": "https://github.com/James2898/ai-toolbox/pull/21"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "t": "#27",
+         "href": "https://github.com/James2898/ai-toolbox/pull/27"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "t": "Catalog site: humanized catalog copy and workflow descriptions across "
+        },
+        {
+         "code": "docs/index.html"
+        },
+        {
+         "t": " and "
+        },
+        {
+         "code": "docs/changelog.html"
+        },
+        {
+         "t": ". ("
+        },
+        {
+         "t": "#24",
+         "href": "https://github.com/James2898/ai-toolbox/pull/24"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "t": "#25",
+         "href": "https://github.com/James2898/ai-toolbox/pull/25"
+        },
+        {
+         "t": ")"
+        }
+       ],
+       [
+        {
+         "t": "Plugin manifest: removed static version field so plugin updates track repository commits directly. ("
+        },
+        {
+         "t": "#18",
+         "href": "https://github.com/James2898/ai-toolbox/pull/18"
+        },
+        {
+         "t": ", "
+        },
+        {
+         "t": "#25",
+         "href": "https://github.com/James2898/ai-toolbox/pull/25"
+        },
+        {
+         "t": ")"
+        }
+       ]
+      ]
+     }
+    ]
+   },
+   {
     "title": "2026-10-28",
     "groups": [
      {

@@ -2,6 +2,36 @@
 
 Changes to the ai-toolbox skills, agents, rules, hooks and build tools, newest first. Only merged work is listed, dated by the day its pull request merged.
 
+## 2026-11-15
+
+### Added
+- `plain-explain` skill: explains technical terms, bugs, PRs, and decisions in plain language for non-technical readers (PO, manager, support) using structured sections (The question / What we found / What it means / Things to watch / Not settled yet), short prose lines, rounded proportions, and no code identifiers. ([#32](https://github.com/James2898/ai-toolbox/pull/32))
+- Catalog: registered `plain-explain` under the explainability category in the catalog site (`docs/index.html`). ([#32](https://github.com/James2898/ai-toolbox/pull/32))
+
+### Changed
+- `gg-explain` and `irl-explain`: route general or non-analogy explanation requests to `plain-explain` by default. ([#32](https://github.com/James2898/ai-toolbox/pull/32))
+- `live-verify`: permits masked screenshots under `{qa_out_dir}/live-verify/<slug>/` for PR evidence while masking personal names, and delegates third-party sign-in flows to manual user interaction. ([#28](https://github.com/James2898/ai-toolbox/pull/28))
+- `retro`: checks repository status, current branch, and the latest commit before presenting diffs to prevent applying stale or misplaced changes, and runs repository privacy/leak checks (`tools/leak_check.py`) over touched files before completion. ([#28](https://github.com/James2898/ai-toolbox/pull/28), [#30](https://github.com/James2898/ai-toolbox/pull/30))
+
+### Fixed
+- `pr-details`: fetches and updates the live pull request body via `gh pr view` when a PR already exists instead of recreating or overwriting it from a local draft. ([#30](https://github.com/James2898/ai-toolbox/pull/30), [#33](https://github.com/James2898/ai-toolbox/pull/33))
+- `pr-peer-review`: validates all drafted comments against the codebase before presenting them to the reviewer. ([#31](https://github.com/James2898/ai-toolbox/pull/31))
+- `pr-comment-triage`: passes review context to `validator-agent` and verifies net-new findings against sibling files. ([#28](https://github.com/James2898/ai-toolbox/pull/28))
+
+## 2026-11-11
+
+### Added
+- `doc-grill` skill: interrogates technical documentation, READMEs, skills, agent definitions, and rules adversarially across seven evaluation families, with `--diff` for drift detection and `--rounds` for interactive review. ([#23](https://github.com/James2898/ai-toolbox/pull/23), [#25](https://github.com/James2898/ai-toolbox/pull/25))
+- `comment-trim` skill: reviews code comments added in a diff and removes narrative restatements, chat artifacts, and banners while shortening explanations to a single line. ([#29](https://github.com/James2898/ai-toolbox/pull/29))
+- `live-verifier` subagent: live browser-driven verification in Tier 1 and Tier 2 orchestration chains via Playwright MCP, with automatic worktree dependency linking and post-orchestration manual verification checklist. ([#22](https://github.com/James2898/ai-toolbox/pull/22), [#25](https://github.com/James2898/ai-toolbox/pull/25), [#27](https://github.com/James2898/ai-toolbox/pull/27))
+- Hooks: `large-bash-write-guard` blocks oversized file writes via Bash command string interpolation and redirects to the dedicated Write tool. ([#26](https://github.com/James2898/ai-toolbox/pull/26))
+
+### Changed
+- `code-grill`: standardized question outputs to use the 5-column Markdown table format matching `design-grill` and `doc-grill`. ([#20](https://github.com/James2898/ai-toolbox/pull/20), [#25](https://github.com/James2898/ai-toolbox/pull/25))
+- Rules: documented Windows shell execution hygiene, subagent background task lifecycle constraints, Git worktree path resolution, and subagent session snapshotting. ([#17](https://github.com/James2898/ai-toolbox/pull/17), [#21](https://github.com/James2898/ai-toolbox/pull/21), [#27](https://github.com/James2898/ai-toolbox/pull/27))
+- Catalog site: humanized catalog copy and workflow descriptions across `docs/index.html` and `docs/changelog.html`. ([#24](https://github.com/James2898/ai-toolbox/pull/24), [#25](https://github.com/James2898/ai-toolbox/pull/25))
+- Plugin manifest: removed static version field so plugin updates track repository commits directly. ([#18](https://github.com/James2898/ai-toolbox/pull/18), [#25](https://github.com/James2898/ai-toolbox/pull/25))
+
 ## 2026-10-28
 
 ### Added

@@ -235,7 +235,7 @@ Once the parallel review/validate step succeeds (`release-manager` PASS and `val
 
 2. **Invoke `@live-verifier`:**
    - Spawn `@live-verifier` with the Handoff Trio.
-   - **No screenshots rule:** `@live-verifier` never captures or saves screenshots to disk, keeping execution fast, clutter-free, and safe for public repositories.
+   - **Screenshots:** pass `Screenshots: yes` in the handoff only when the user's request asks for PR screenshots; otherwise `no` (the default). With `yes`, `@live-verifier` masks names and saves only under the git-ignored `{qa_out_dir}`, never committed.
    - If `@live-verifier` reports `UNAUTHENTICATED_SESSION` on a login-required page: hit Permitted Pause Point #4, prompt the user to log in once in the headed browser window, and resume.
 
 3. **Handle `@live-verifier` Verdict:**
