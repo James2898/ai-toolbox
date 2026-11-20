@@ -11,6 +11,7 @@ The pages repeat only what the repository already publishes: skill and agent fro
 hook script headers, rule summaries, the keys of profiles/example.yml and CHANGELOG.md. The output holds no
 commit id or date, so rebuilding an unchanged tree gives the same bytes and --check stays stable.
 """
+import html
 import json
 import re
 import sys
@@ -25,6 +26,7 @@ PROFILE = ROOT / "profiles" / "example.yml"
 WORKFLOW = ROOT / "tools" / "site" / "workflow.json"
 CHANGELOG = ROOT / "CHANGELOG.md"
 CHANGELOG_TEMPLATE = ROOT / "tools" / "site" / "changelog.html"
+SKILL_TEMPLATE = ROOT / "tools" / "site" / "skill_template.html"
 CHANGE_KINDS = ("Added", "Changed", "Fixed", "Removed")
 AGY_DIR = "antigravity/ai-toolbox"
 WRITE_TOOLS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
@@ -40,6 +42,213 @@ def unquote(v):
     if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
         v = v[1:-1].replace('\\"', '"')
     return v
+
+
+def inline_format(text):
+    code_spans = []
+
+    def save_code(m):
+        code_spans.append("<code>" + html.escape(m.group(1)) + "</code>")
+        return f"\x00CODE{len(code_spans) - 1}\x00"
+
+    text = re.sub(r"`([^`]+)`", save_code, text)
+    text = html.escape(text)
+
+    def replace_link(m):
+        lt = m.group(1)
+        url = m.group(2)
+        return f'<a href="{url}">{lt}</a>'
+
+    text = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)", replace_link, text)
+    text = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", text)
+    text = re.sub(r"(?<!\*)\*([^*\s](?:.*?[^*\s])?)\*(?!\*)", r"<em>\1</em>", text)
+
+    for i, cs in enumerate(code_spans):
+        text = text.replace(f"\x00CODE{i}\x00", cs)
+
+    return text
+
+
+def parse_lists(lines, i, n):
+    items = []
+    while i < n:
+        line = lines[i]
+        if not line.strip():
+            if i + 1 < n and (re.match(r"^\s*([-*+]|\d+\.)\s+", lines[i + 1]) or (re.match(r"^\s+", lines[i + 1]) and not re.match(r"^\s*[#|`>]", lines[i + 1]))):
+                i += 1
+                continue
+            else:
+                break
+        m_item = re.match(r"^(\s*)([-*+]|\d+\.)\s+(.*)$", line)
+        if m_item:
+            ind = len(m_item.group(1))
+            bullet = m_item.group(2)
+            content = m_item.group(3)
+            is_ol = bullet[0].isdigit()
+            i += 1
+            cont = []
+            while i < n and lines[i].strip() and not re.match(r"^\s*([-*+]|\d+\.)\s+", lines[i]):
+                if lines[i].startswith(" " * (ind + 1)) or not re.match(r"^[#|`>]", lines[i]):
+                    cont.append(lines[i].strip())
+                    i += 1
+                else:
+                    break
+            full_text = content + (" " + " ".join(cont) if cont else "")
+            items.append((ind, is_ol, full_text))
+        else:
+            break
+
+    if not items:
+        return "", i
+
+    stack = []
+    html_out = []
+
+    for ind, is_ol, text in items:
+        tag = "ol" if is_ol else "ul"
+        if not stack:
+            stack.append((ind, tag))
+            html_out.append(f"<{tag}><li>{inline_format(text)}")
+        elif ind > stack[-1][0]:
+            stack.append((ind, tag))
+            html_out.append(f"<{tag}><li>{inline_format(text)}")
+        elif ind < stack[-1][0]:
+            while stack and ind < stack[-1][0]:
+                _, close_tag = stack.pop()
+                html_out.append(f"</li></{close_tag}>")
+            if stack and stack[-1][1] != tag:
+                _, close_tag = stack.pop()
+                html_out.append(f"</li></{close_tag}><{tag}>")
+                stack.append((ind, tag))
+            else:
+                html_out.append("</li>")
+            html_out.append(f"<li>{inline_format(text)}")
+        else:
+            if stack[-1][1] != tag:
+                _, close_tag = stack.pop()
+                html_out.append(f"</li></{close_tag}><{tag}>")
+                stack.append((ind, tag))
+            else:
+                html_out.append("</li>")
+            html_out.append(f"<li>{inline_format(text)}")
+
+    while stack:
+        _, close_tag = stack.pop()
+        html_out.append(f"</li></{close_tag}>")
+
+    return "".join(html_out), i
+
+
+def markdown_to_html(md):
+    lines = md.replace("\r\n", "\n").split("\n")
+    html_out = []
+    i = 0
+    n = len(lines)
+
+    while i < n:
+        line = lines[i]
+
+        if not line.strip():
+            i += 1
+            continue
+
+        m_fence = re.match(r"^(\s*)(`{3,}|~{3,})(.*)$", line)
+        if m_fence:
+            fence_indent = len(m_fence.group(1))
+            fence_chars = m_fence.group(2)
+            lang = m_fence.group(3).strip()
+            code_lines = []
+            i += 1
+            while i < n:
+                m_close = re.match(r"^(\s*)(`{3,}|~{3,})\s*$", lines[i])
+                if m_close and len(m_close.group(1)) <= fence_indent and m_close.group(2)[0] == fence_chars[0] and len(m_close.group(2)) >= len(fence_chars):
+                    i += 1
+                    break
+                code_lines.append(lines[i])
+                i += 1
+            code_str = html.escape("\n".join(code_lines))
+            cls_attr = f' class="language-{html.escape(lang)}"' if lang else ""
+            html_out.append(f"<pre><code{cls_attr}>{code_str}</code></pre>")
+            continue
+
+        m_head = re.match(r"^(#{1,6})\s+(.*)$", line)
+        if m_head:
+            level = len(m_head.group(1))
+            tag = f"h{min(level, 6)}"
+            heading_content = inline_format(m_head.group(2).strip())
+            html_out.append(f"<{tag}>{heading_content}</{tag}>")
+            i += 1
+            continue
+
+        if re.match(r"^(\*{3,}|-{3,}|_{3,})$", line.strip()):
+            html_out.append("<hr>")
+            i += 1
+            continue
+
+        if line.startswith(">"):
+            bq_lines = []
+            while i < n and lines[i].startswith(">"):
+                bq_lines.append(re.sub(r"^>\s?", "", lines[i]))
+                i += 1
+            bq_content = markdown_to_html("\n".join(bq_lines))
+            html_out.append(f"<blockquote>{bq_content}</blockquote>")
+            continue
+
+        if line.strip().startswith("|") and i + 1 < n and re.match(r"^\s*\|?\s*[-:]+[-| :]*\|?\s*$", lines[i + 1]):
+            header_raw = [c.strip() for c in line.strip().strip("|").split("|")]
+            alignments = []
+            sep_cells = [c.strip() for c in lines[i + 1].strip().strip("|").split("|")]
+            for sc in sep_cells:
+                if sc.startswith(":") and sc.endswith(":"):
+                    alignments.append(' style="text-align:center"')
+                elif sc.endswith(":"):
+                    alignments.append(' style="text-align:right"')
+                else:
+                    alignments.append("")
+            i += 2
+            body_rows = []
+            while i < n and lines[i].strip().startswith("|"):
+                row_cells = [c.strip() for c in lines[i].strip().strip("|").split("|")]
+                body_rows.append(row_cells)
+                i += 1
+
+            th_cells = []
+            for idx, c in enumerate(header_raw):
+                align = alignments[idx] if idx < len(alignments) else ""
+                th_cells.append(f"<th{align}>{inline_format(c)}</th>")
+            tr_head = f"<tr>{''.join(th_cells)}</tr>"
+            tr_body_list = []
+            for row in body_rows:
+                td_cells = []
+                for idx, c in enumerate(row):
+                    align = alignments[idx] if idx < len(alignments) else ""
+                    td_cells.append(f"<td{align}>{inline_format(c)}</td>")
+                tr_body_list.append(f"<tr>{''.join(td_cells)}</tr>")
+            tbody_html = "".join(tr_body_list)
+            html_out.append(f'<div class="table-scroll"><table><thead>{tr_head}</thead><tbody>{tbody_html}</tbody></table></div>')
+            continue
+
+        if re.match(r"^\s*([-*+]|\d+\.)\s+", line):
+            list_html, i = parse_lists(lines, i, n)
+            html_out.append(list_html)
+            continue
+
+        para_lines = []
+        while i < n and lines[i].strip():
+            if (lines[i].strip().startswith("```") or
+                re.match(r"^#{1,6}\s+", lines[i]) or
+                re.match(r"^(\*{3,}|-{3,}|_{3,})$", lines[i].strip()) or
+                lines[i].startswith(">") or
+                lines[i].strip().startswith("|") or
+                re.match(r"^\s*([-*+]|\d+\.)\s+", lines[i])):
+                break
+            para_lines.append(lines[i].strip())
+            i += 1
+        if para_lines:
+            para_content = inline_format(" ".join(para_lines))
+            html_out.append(f"<p>{para_content}</p>")
+
+    return "\n".join(html_out)
 
 
 def frontmatter(path):
@@ -302,6 +511,7 @@ def build_data():
 
     agents = read_agents(skills)
     hooks_description, hooks = read_hooks()
+    skill_bodies = {s["name"]: s["_body"] for s in skills}
     for s in skills:
         del s["_body"]
     return {
@@ -330,7 +540,7 @@ def build_data():
         "hooks": hooks,
         "rules": read_rules(),
         "profile": read_profile(),
-    }
+    }, skill_bodies
 
 
 def as_json(data):
@@ -338,22 +548,87 @@ def as_json(data):
 
 
 def render():
-    data = build_data()
+    data, skill_bodies = build_data()
     template = TEMPLATE.read_text(encoding="utf-8")
     if template.count("/*DATA*/") != 1:
         raise BuildError("template.html must contain /*DATA*/ exactly once")
-    # The changelog page reuses the catalog's stylesheet, so the two pages cannot drift apart.
+    # The changelog page and skill pages reuse the catalog's stylesheet, so pages cannot drift apart.
     style = re.search(r"<style>\n(.*?)</style>", template, re.S)
-    page = CHANGELOG_TEMPLATE.read_text(encoding="utf-8")
-    if not style or page.count("/*STYLE*/") != 1 or page.count("/*DATA*/") != 1:
-        raise BuildError("changelog.html must contain /*STYLE*/ and /*DATA*/ once, and template.html one <style> block")
+    if not style:
+        raise BuildError("template.html must contain one <style> block")
+    style_css = style.group(1).rstrip()
+
+    changelog_page = CHANGELOG_TEMPLATE.read_text(encoding="utf-8")
+    if changelog_page.count("/*STYLE*/") != 1 or changelog_page.count("/*DATA*/") != 1:
+        raise BuildError("changelog.html must contain /*STYLE*/ and /*DATA*/ once")
     log = {k: data[k] for k in ("version", "repo", "license")}
     log["changelog"] = read_changelog()
-    return {
+
+    skill_template = SKILL_TEMPLATE.read_text(encoding="utf-8")
+    if skill_template.count("/*STYLE*/") != 1:
+        raise BuildError("skill_template.html must contain /*STYLE*/ exactly once")
+    skill_base = skill_template.replace("/*STYLE*/", style_css)
+
+    blob = data["repo"] + "/blob/main/"
+    cat_by_skill = {name: c["name"] for c in data["categories"] for name in c["skills"]}
+
+    files = {
         "index.html": template.replace("/*DATA*/", as_json(data)),
-        "changelog.html": page.replace("/*STYLE*/", style.group(1).rstrip()).replace("/*DATA*/", as_json(log)),
+        "changelog.html": changelog_page.replace("/*STYLE*/", style_css).replace("/*DATA*/", as_json(log)),
         ".nojekyll": "",
     }
+
+    for s in data["skills"]:
+        name = s["name"]
+        cat_name = cat_by_skill.get(name, "")
+        badges = [f'<span class="badge gold">{html.escape(cat_name)}</span>']
+        if s["user_only"]:
+            badges.append('<span class="badge user">User-only</span>')
+        if s["tools"] is None:
+            badges.append('<span class="badge">All tools</span>')
+        elif s["writes"]:
+            badges.append('<span class="badge">Edits files</span>')
+        else:
+            badges.append('<span class="badge ro">Read-only tools</span>')
+        if s["uses_agents"]:
+            badges.append('<span class="badge gold">Uses subagents</span>')
+        for x in s["extras"]:
+            badges.append(f'<span class="badge gold">+ {html.escape(x)}/</span>')
+
+        tools_html = ""
+        if s["tools"]:
+            tools_tags = " ".join(f"<code>{html.escape(t)}</code>" for t in s["tools"])
+            tools_html = f'<div class="meta-tools"><span class="meta-label">Allowed tools</span> {tools_tags}</div>'
+
+        meta_card = (
+            '<article class="meta-card">\n'
+            '  <div class="meta-head">\n'
+            f'    <h1 class="meta-title">/ai-toolbox:{html.escape(name)}</h1>\n'
+            f'    <div class="badges">{"".join(badges)}</div>\n'
+            '  </div>\n'
+            f'  <p class="meta-desc">{html.escape(s["description"])}</p>\n'
+            + (f'  {tools_html}\n' if tools_html else '') +
+            '  <div class="meta-foot">\n'
+            f'    <a href="{blob + s["path"]}">Claude source</a>\n'
+            f'    <a href="{blob + s["agy_path"]}">Antigravity copy</a>\n'
+            '  </div>\n'
+            '</article>'
+        )
+
+        body_html = markdown_to_html(skill_bodies.get(name, ""))
+
+        page = skill_base
+        page = page.replace("/*NAME*/", html.escape(name))
+        page = page.replace("/*DESCRIPTION_ATTR*/", html.escape(s["summary"]))
+        page = page.replace("/*CATEGORY*/", html.escape(cat_name))
+        page = page.replace("/*METADATA_CARD*/", meta_card)
+        page = page.replace("/*BODY*/", body_html)
+        page = page.replace("/*REL_PATH*/", html.escape(s["path"]))
+        page = page.replace("/*LICENSE*/", html.escape(data.get("license", "")))
+
+        files[f"skills/{name}.html"] = page
+
+    return files
 
 
 def main(argv):
@@ -372,8 +647,11 @@ def main(argv):
         return 0
     OUT.mkdir(exist_ok=True)
     for name, content in files.items():
-        (OUT / name).write_text(content, encoding="utf-8")
-    print(f"wrote {OUT.relative_to(ROOT)}/index.html and changelog.html")
+        dest = OUT / name
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(content, encoding="utf-8")
+    skill_count = len([k for k in files if k.startswith("skills/")])
+    print(f"wrote {OUT.relative_to(ROOT)}/index.html, changelog.html, and {skill_count} skill pages")
     return 0
 
 
