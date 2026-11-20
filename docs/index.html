@@ -99,13 +99,28 @@ section > h2 { font: 600 1.5rem/2rem var(--display); letter-spacing: 0.01em; mar
 .card h3 { margin: 0; font: 600 1.0625rem/1.5rem var(--display); letter-spacing: 0.01em; color: var(--primary-text); word-break: break-word; }
 .card p { margin: 0; font: 400 1rem/1.625rem var(--serif); color: var(--text); }
 .card p.used-by { font: 400 0.75rem/1rem var(--sans); color: var(--muted); }
-.card .more { background: none; border: 0; padding: 0; color: var(--primary-text); font: 500 0.8125rem/1.125rem var(--sans); cursor: pointer; align-self: flex-start; }
 .badges { display: flex; flex-wrap: wrap; gap: 0.375rem; }
 .badge { font: 700 0.6875rem/0.875rem var(--sans); letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--border); border-radius: var(--radius); padding: 2px 6px; color: var(--muted); background: var(--surface); white-space: nowrap; }
 .badge.user { color: var(--crimson); background: var(--crimson-soft); border-color: var(--crimson); }
 .badge.ro { color: var(--primary-text); border-color: var(--primary); }
 .badge.gold { color: var(--gold-text); background: var(--tint); border-color: var(--gold); }
 .card .foot { margin-top: auto; padding-top: 0.5rem; border-top: 1px solid var(--rule); display: flex; gap: 1rem; font: 500 0.8125rem/1.125rem var(--sans); flex-wrap: wrap; }
+.card.skill-card { position: relative; cursor: pointer; transition: transform 180ms ease, border-color 180ms ease; }
+.card.skill-card:hover, .card.skill-card:focus-within { transform: translateY(-2px); border-color: var(--primary); }
+.card.skill-card .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+.card.skill-card h3 { margin: 0; font: 600 1.0625rem/1.5rem var(--display); letter-spacing: 0.01em; color: var(--primary-text); word-break: break-word; }
+.card.skill-card .card-link { color: inherit; text-decoration: none; }
+.card.skill-card .card-link::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.card.skill-card .card-link:focus { outline: none; }
+.card.skill-card:focus-within { outline: 2px solid var(--primary); outline-offset: 1px; }
+.card.skill-card .chevron { flex-shrink: 0; font: 600 1.125rem/1 var(--display); color: var(--primary-text); transition: transform 180ms ease; user-select: none; }
+.card.skill-card:hover .chevron, .card.skill-card:focus-within .chevron { transform: translateX(3px); }
+@media (prefers-reduced-motion: reduce) {
+  .card.skill-card { transition: border-color 180ms ease; }
+  .card.skill-card:hover, .card.skill-card:focus-within { transform: none; }
+  .card.skill-card .chevron { transition: none; }
+  .card.skill-card:hover .chevron, .card.skill-card:focus-within .chevron { transform: none; }
+}
 .empty { font: 400 1rem/1.625rem var(--serif); color: var(--muted); padding: 1.25rem 0; }
 
 table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; font: 400 0.875rem/1.25rem var(--sans); }
@@ -1969,23 +1984,11 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
     if (s.uses_agents) badges.push(el("span", { class: "badge gold", text: "Uses subagents" }));
     s.extras.forEach(function (x) { badges.push(el("span", { class: "badge gold", text: "+ " + x + "/" })); });
 
+    var link = el("a", { class: "card-link", href: "skills/" + s.name + ".html", text: "/ai-toolbox:" + s.name });
+    var chevron = el("span", { class: "chevron", "aria-hidden": "true", text: "→" });
+    var head = el("div", { class: "card-head" }, [el("h3", null, [link]), chevron]);
     var p = el("p", { text: s.summary });
-    var kids = [el("h3", { text: "/ai-toolbox:" + s.name }), el("div", { class: "badges" }, badges), p];
-    if (s.description !== s.summary) {
-      var more = el("button", { type: "button", class: "more", "aria-expanded": "false", text: "Show full description" });
-      more.addEventListener("click", function () {
-        var open = more.getAttribute("aria-expanded") === "true";
-        p.textContent = open ? s.summary : s.description;
-        more.setAttribute("aria-expanded", String(!open));
-        more.textContent = open ? "Show full description" : "Show less";
-      });
-      kids.push(more);
-    }
-    kids.push(el("div", { class: "foot" }, [
-      el("a", { href: blob + s.path, text: "Claude source" }),
-      el("a", { href: blob + s.agy_path, text: "Antigravity copy" })
-    ]));
-    return el("article", { class: "card" }, kids);
+    return el("article", { class: "card skill-card" }, [head, el("div", { class: "badges" }, badges), p]);
   }
 
   function matches(s) {
