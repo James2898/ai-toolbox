@@ -89,7 +89,7 @@ When `@release-manager` sends NEEDS CHANGES back to `@fullstack-developer`:
 When `@live-verifier` executes (Tier 1 & Tier 2 after parallel review/validate):
 1. **Applicability Gate:** PM verifies whether the git diff modifies frontend/UI surface and `{local_url}` is configured. Non-UI tasks record `SKIPPED: non-UI task` and bypass live verification.
 2. **Missing Environment / MCP:** If `{local_url}` is unreachable or Playwright MCP tools are unavailable:
-   - **Worktree Auto-Link First:** If operating in a Git worktree, do not immediately skip. First automatically link `node_modules` (directory junction) and `.env.local` (file copy) from the primary repository root, start the dev server in the background on an isolated port (e.g. `3001`), verify readiness, and proceed with live testing (cleaning up temporary links upon completion).
+   - **Worktree Auto-Link First:** If operating in a Git worktree, do not immediately skip. First check if `<primary_root>/node_modules` exists; if missing in the primary repo, ask user for explicit approval to run `npm ci` in the primary repo once, so all present and future worktrees can share the directory via symlink without redundant installs. Then link `node_modules` (directory junction/symlink) and `.env.local` (file copy) from the primary repository root, start the dev server in the background on an isolated port (e.g. `3001`), verify readiness, and proceed with live testing (cleaning up temporary links upon completion).
    - Only if `{local_url}` remains unreachable after attempting setup or Playwright MCP tools are missing, record `SKIPPED: env/mcp offline` and proceed without failing the chain.
 3. **Authentication Wall:** If an unauthenticated session is detected on a login-required page, the chain pauses for the user to log in once in the headed browser window, then resumes.
 4. **Failure & Retry Limit:** When `@live-verifier` reports failure (DOM assertion failure, unexpected 500 error, missing toast), PM routes the failure details to `@fullstack-developer`. If the same failure persists after 2 fix attempts, stop the chain and surface to the user.
@@ -110,12 +110,13 @@ If the tech stack for a given layer is still TBD, do not assume a framework or l
 
 ## Headless Shells, Interactive Commands & Token Loop Guard
 
-- **No Interactive Auth or Terminal Input Commands**: Never execute commands that prompt for interactive credentials (e.g., `git push`, `gh auth login`, `ssh` without key) unless credentials/tokens are pre-verified. Always prefer non-interactive flags (e.g., `CI=true`, `PIP_NO_INPUT=1`, `npm --yes`).
+- **No Interactive Auth or Terminal Input Commands**: Never execute commands that prompt for interactive credentials (e.g., `git push`, `gh auth login`, `ssh` without key) unless credentials/tokens are pre-verified. Always prefer non-interactive flags (e.g., `CI=true`, `PIP_NO_INPUT=1`, `npm --yes`, and `npx --yes <pkg>` with `--yes` placed *before* the package name so `npx` itself does not prompt to install). When running project scaffolders (`create-next-app`, `create-vite`, etc.) in a workspace that already contains `.ai-toolbox/` or documentation folders, scaffold into `/tmp/<slug>-scaffold` and copy the files into the workspace root to avoid directory conflict aborts.
+- **Linux NAT64 / IPv6 `gh` CLI Fallback (`GODEBUG=netdns=cgo`)**: When Go-based CLIs such as `gh` fail with `dial tcp [64:ff9b::...]:443: connect: network is unreachable`, prefix the command with `GODEBUG=netdns=cgo` so Go uses the system C resolver (IPv4) instead of synthesized NAT64 IPv6 addresses.
 - **Reactive Wakeup Over Active Polling (Long-Running Tasks)**:
   - For naturally slow commands (e.g., package installation, build, test suites), use higher synchronous wait limits or let the task run in the background and rely on the platform's **reactive completion notification**. Do **not** actively poll `manage_task` or read terminal buffers in a loop.
-- **Strict Stalling & Retry Cap (Max 1 Retry)**:
+- **Strict Stalling & Retry Cap (Max 3 Retries)**:
   - If a background command stalls waiting for interactive input, hangs unexpectedly, or fails on missing credentials:
-    1. Check status / retry at most **once**.
+    1. Check status / retry up to **3 times** (particularly for transient network/API errors such as `gh pr create` GraphQL EOF).
     2. If still unresolvable or blocked on credentials/input, **immediately terminate the task**.
     3. Surface the exact command to the user to execute directly in their interactive terminal.
 - **Token Loop Prevention**: In sessions with large active context windows (100k+ tokens), repetitive polling loops re-read the entire context on every turn, rapidly burning millions of tokens in minutes.
@@ -137,6 +138,9 @@ If the tech stack for a given layer is still TBD, do not assume a framework or l
 ## Git Operations Approval
 
 Never create a new git branch (`git checkout -b`, `git branch`) or commit changes (`git commit`) autonomously without explicit user approval. Always present the proposed branch name, staged diff/changes, and commit message to the user, and wait for confirmation before executing. Always prefer `git fetch origin --prune` over fetching single branches (e.g. `git fetch origin main`), ensuring newly created remote tracking branches (such as `develop` or topic branches) are immediately discoverable.
+
+- **GitHub Email Privacy Pre-Push Guard:** Before executing `git push` on public repositories or accounts with GitHub email privacy enabled, verify the commit author email: `git log -n 1 --format="%ae"`. If the account uses GitHub noreply privacy (`<id>+<username>@users.noreply.github.com`), ensure all branch commits match this address before pushing, using `git rebase -i --exec "git commit --amend --reset-author --no-edit"` if author mismatch is detected.
+- **Post-Merge Compilation Verification:** Whenever merging a parent or sibling branch (`git merge <remote>/<branch>`), even if Git reports clean automatic resolution, always execute `npm run build` (or language-equivalent typecheck/compiler pass) before committing or pushing to catch silent duplicate block-scoped declarations.
 
 ---
 

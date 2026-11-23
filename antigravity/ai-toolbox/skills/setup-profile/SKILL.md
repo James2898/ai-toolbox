@@ -23,7 +23,7 @@ Every ai-toolbox skill reads `AI_TOOLBOX_PROFILE`, else `<project root>/.ai-tool
 
 ### 1. Find the template and any existing profile
 
-- The key list comes from `profiles/example.yml` in the ai-toolbox plugin (`~/.gemini/config/plugins/ai-toolbox/../profiles/example.yml` when installed as a plugin, or the toolbox checkout). If neither is reachable, use the key list in the table in step 2.
+- The key list comes from `resources/example.yml` inside this skill folder (`~/.gemini/config/plugins/ai-toolbox/skills/setup-profile/resources/example.yml`, or `profiles/example.yml` in the toolbox checkout). If neither is reachable, use the key list in the table in step 2.
 - If a profile already exists (env var or `.ai-toolbox/profile.yml`), read it. Without `--update`, ask whether to update it or stop; never overwrite it silently.
 
 Done when: you know the target path and which keys already have values.
