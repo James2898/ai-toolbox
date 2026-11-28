@@ -261,7 +261,8 @@ This is the core deliverable. For **each** comment, do real research before writ
 3. **Cross-reference** the validator findings (Step 2a) when they land — if the validator independently flagged the same spot, say so; if it contradicts the comment, surface that.
 4. **Cross-reference the PBI** (Step 0) — if the comment touches behavior tied to an acceptance criterion, note whether the criterion is still satisfied after the change. Flag if a comment's resolution breaks a criterion or drifts outside the PBI's scope.
 5. **Form an independent verdict**: Agree / Partially agree / Disagree, with the technical reason and a `file:line` citation.
-6. **Duplicate server state.** When the PR adds a second read of state another component already holds (editable flags, approval status, permissions), list what refreshes each copy and walk every mutation reachable from the same screen. If one copy refreshes and the other does not, that is a correctness finding, not a performance note.
+6. **Missing-test claims are negative-existence claims.** Before agreeing with a comment that says a test is missing, or writing an own finding that says so, `git grep` the asserted value (`ptrBool(false)`, the status code, the JSON field) across the whole package at the PR head, not only the PR's test files. The covering test is often pre-existing and outside the diff, and a test on one entry point (list read) covers the shared path another entry point (sync) uses. On a past review an own finding said nothing checked a read-path flag; an untouched list-endpoint test file already did, and the author added tests for nothing.
+7. **Duplicate server state.** When the PR adds a second read of state another component already holds (editable flags, approval status, permissions), list what refreshes each copy and walk every mutation reachable from the same screen. If one copy refreshes and the other does not, that is a correctness finding, not a performance note.
 
 Keep the table cell to a tight verdict + reason. If a comment needs deep analysis, put a short verdict in the table and write the full reasoning in a **per-comment Research Appendix** section below the table, linked from the table (e.g. `see §C3`). The user explicitly wants in-depth research, not one-line hand-waves — err toward the appendix for anything non-trivial.
 
@@ -280,6 +281,14 @@ If the validator is still running when comments are done, wait for it before wri
 > **The validator is diff-scoped and runs no tests.** Its verdict is never evidence that the suites pass. When the PR changes behaviour other packages depend on, run the affected suites yourself inside `$WT` (`{backend_test}` / `{frontend_check}`) — the changed package **and** its dependants (`{dependent_suites}`) — and record the result in the Validator Audit section. If they cannot run in the worktree, say so rather than implying coverage.
 >
 > Run frontend suites with `{frontend_test_in_worktree}`. Do not use `npx <runner>`: it can download a different runner version and resolves its config from the shell's current directory, which may not be `$WT`.
+
+### Step 5.2 — Three passes before any "nothing blocks merge" (MANDATORY)
+
+Run these on the PR's own changes before writing the Reviewer Summary. Each one caught a point a second reviewer raised after a past review called the PR clean. Record each result, or "none", under My Own Findings.
+
+1. **Every deferral is tracked.** For each gap the PR, its body, the PBI or the bug doc defers ("next phase", "follow-up", "out of scope"), look for the ticket or task that tracks it. If there is none, the deferral is an own finding: an `[IMO]`/`[ASK]` asking for it to be tracked, which says what users lose until then. "The doc defers it" makes it out of scope for this PR's code, not out of the review. Do not drop it because a bot thread touches something nearby; draft it when the user-facing gap is not what the bot asked about.
+2. **Every guard has a test that fails without it.** For each guard clause or branch condition the PR adds, name the test that goes red when **only that condition** is removed. A case whose fixture also trips an earlier guard does not count (for example, an exclusion-rule case with a nil field the next guard checks). "The tests fail without the fix" is a whole-change check and does not cover this. When you cannot name the test, delete the condition in `$WT` and run the suite, then restore it.
+3. **Renames and behavior changes are swept across the docs.** For each renamed identifier and each changed behavior, `git grep` the old name and the old wording at the PR head across code, specs and **every** docs tree, including in-progress planning or backlog docs (requirements decisions, design, tasks), not only the published spec. Stale lines are an `[ASK]` to update them, or a one-line pointer to this PR when someone else owns those docs.
 
 ---
 
@@ -412,8 +421,9 @@ The report itself is never posted. When the user then asks to "draft the comment
   - (c) reviewer-policy memories for the touched area, read whole (a correction block outranks the headline);
   - (d) the state the finding describes can actually happen: trace what can change its inputs while the code is mounted (a validator finding is a lead to verify, not a second opinion);
   - (e) the PR body and the spec or SDD docs do not already answer it;
-  - (f) comments re-fetched, so the point is not already raised.
-  A draft that fails (b), (c) or (d) is withdrawn or downgraded before the user sees it.
+  - (f) comments re-fetched, so the point is not already raised;
+  - (g) for a "no test for X" / "nothing checks X" draft: the asserted value (not just the function name) was grepped across the **whole package at the PR head** with `git grep -n '<value>' <head> -- <package dir>`, pre-existing tests included, and every entry point to the path (list and detail reads, sync and preview) was checked. Name the files searched in the Checks line.
+  A draft that fails (b), (c), (d) or (g) is withdrawn or downgraded before the user sees it.
 - **Cite only what teammates can open:** paths in the PR's head or base tree, PR and commit numbers, and URLs. Never cite `{pbi_dir}`, the report folder, memory files, or any path listed in `.git/info/exclude`.
 - **Humanize before showing:** pass each draft body through the `humanizer` skill in embedded mode. Keep the label prefix and every code span unchanged.
 - **Own findings only.** Draft comments solely for issues the reviewer flagged independently (the "My Own Findings" section). Do **not** draft replies to Devin/bot threads or restate other reviewers' points — this is a teammate's PR, and those threads are the author's to handle. (This differs from `pr-comment-triage`, which is for the user's own PRs.)
