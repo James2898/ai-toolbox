@@ -72,6 +72,8 @@ Patterns audited:
 ### Remediations
 1. `git rm --cached MEMORY.md`
 2. Add `MEMORY.md` to `.gitignore`
+
+> **Next step:** Remediations above are proposed only. Reply "apply remediations" to execute them, or "keep as-is" to leave them untouched.
 ```
 
 Severity:

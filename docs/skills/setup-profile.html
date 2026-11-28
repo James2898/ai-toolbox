@@ -247,7 +247,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
   <article class="meta-card">
   <div class="meta-head">
     <h1 class="meta-title">/ai-toolbox:setup-profile</h1>
-    <div class="badges"><span class="badge gold">Orchestration &amp; session</span><span class="badge user">User-only</span><span class="badge">Edits files</span></div>
+    <div class="badges"><span class="badge gold">Orchestration &amp; session</span><span class="badge user">User-only</span><span class="badge">Edits files</span><span class="badge gold">+ resources/</span></div>
   </div>
   <p class="meta-desc">Create or update the ai-toolbox project profile for the current repo: detect every key in profiles/example.yml from the repo itself (git remote and branches, PR template, package and build files, test commands, docs and migration folders), mark each value as detected or guessed, ask the unknowns in one round, then write the profile where it stays private.</p>
   <div class="meta-tools"><span class="meta-label">Allowed tools</span> <code>Bash</code> <code>Read</code> <code>Glob</code> <code>Grep</code> <code>Write</code> <code>Edit</code> <code>AskUserQuestion</code></div>
@@ -263,7 +263,7 @@ footer { border-top: 3px double var(--gold); padding: 1.25rem 0 2.5rem; font: 40
 <div class="table-scroll"><table><thead><tr><th>Argument</th><th>Meaning</th></tr></thead><tbody><tr><td>(none)</td><td>write <code>&lt;project root&gt;/.ai-toolbox/profile.yml</code></td></tr><tr><td><code>--private=&lt;path&gt;</code></td><td>write to that path instead (for example <code>~/.config/ai-toolbox/profiles/&lt;repo&gt;.yml</code>) and print the <code>export AI_TOOLBOX_PROFILE=…</code> line</td></tr><tr><td><code>--update</code></td><td>read the existing profile, fill only empty or stale keys, and show a diff</td></tr></tbody></table></div>
 <h2>Steps</h2>
 <h3>1. Find the template and any existing profile</h3>
-<ul><li>The key list comes from <code>profiles/example.yml</code> in the ai-toolbox plugin (<code>${CLAUDE_PLUGIN_ROOT}/../profiles/example.yml</code> when installed as a plugin, or the toolbox checkout). If neither is reachable, use the key list in the table in step 2.</li><li>If a profile already exists (env var or <code>.ai-toolbox/profile.yml</code>), read it. Without <code>--update</code>, ask whether to update it or stop; never overwrite it silently.</li></ul>
+<ul><li>The key list comes from <code>resources/example.yml</code> inside this skill folder (<code>${CLAUDE_PLUGIN_ROOT}/skills/setup-profile/resources/example.yml</code>, or <code>profiles/example.yml</code> in the toolbox checkout). If neither is reachable, use the key list in the table in step 2.</li><li>If a profile already exists (env var or <code>.ai-toolbox/profile.yml</code>), read it. Without <code>--update</code>, ask whether to update it or stop; never overwrite it silently.</li></ul>
 <p>Done when: you know the target path and which keys already have values.</p>
 <h3>2. Detect each key from the repo</h3>
 <p>Read the evidence, not memory. Record for every key: value, source (<code>file:line</code> or command), and confidence: <strong>detected</strong> (read directly), <strong>guessed</strong> (inferred from a pattern), or <strong>unknown</strong>.</p>
