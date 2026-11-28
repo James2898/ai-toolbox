@@ -269,20 +269,16 @@ When you DO spawn, pass the full batch exactly as described in "Bug Resolution (
 
 Once the entire orchestration chain finishes (all specialist agents, reviews, and `@debug-memory` have completed):
 
-If `@live-verifier` executed and produced a **PASS** verdict:
-1. Prompt the user (via `ask_question`):
-   - Question: *"The orchestration has finished. Automated live verification passed. Would you like to run manual verification on the live app before finalizing?"*
-   - Options: `["(Recommended) No, finalize task", "Yes, let me manually verify"]`
-2. **If the user selects "Yes":**
+1. **Emit the final completion summary first** so the user immediately sees the full status table, files changed, test results, and commit readiness.
+2. If `@live-verifier` executed and produced a **PASS** verdict, append a one-line offer in plain text at the end of the summary (do NOT block final output behind `ask_question`):
+   *"Automated live verification passed. Reply if you would like me to start the preview/dev server and show the prioritized manual verification checklist (Local + LAN URLs)."*
+3. **If the user replies asking for manual verification:**
    - **Ensure dev server is running:** Check if `{local_url}` is responsive. If not, launch the dev server in the background (using profile `commands.dev_server` or `package.json` dev script, e.g. `npm run dev` / `pnpm dev`).
    - **Present the Prioritized Manual Verification Guide:** Display the prioritized checklist extracted from `@live-verifier`'s report with target routes, actions, and expected results:
      - **P1 (Core flows):** Primary user journeys touched by the task's acceptance criteria.
      - **P2 (Edge / Error branches):** Validation errors, empty states, cancel/dismiss flows.
      - **P3 (Sibling regressions):** Mirrored or adjacent screens sharing modified hooks/components.
      - **Network Paths for Multi-Device / Remote:** Always query the machine's active local network IPv4 address (e.g. `Get-NetIPAddress`) and present both Local (`http://localhost:<port>`) and Network URLs (`http://<LAN-IP>:<port>`) so users testing on remote devices, phones, or tablets on the same LAN can access the running instance immediately.
-   - **Pause for confirmation:** Halt orchestration (Permitted Pause Point #5) until the user indicates manual verification is complete.
-3. **If the user selects "No" (or once manual verification concludes):**
-   - Emit the final completion summary to the user.
 
 ### Validator Issues BLOCKED Verdict (within the parallel step)
 
